@@ -1,0 +1,22 @@
+# SandSim Items Configuration
+
+# ── Sand Shovel ─────────────────────────────────────────────
+shovel:
+  name: "&e&lSand Shovel"
+  lore:
+    - "&7Use this shovel to mine sand"
+    - "&7and collect resources!"
+    - ""
+    - "&6&l✦ &eUnbreakable"
+    - "&6&l✦ &eSoulbound"
+
+# ── Server Menu Item ────────────────────────────────────────
+# The item given to every player in hotbar slot 8.
+# Right-click (or left-click) opens the main Menu GUI.
+menu-item:
+  material: NETHER_STAR
+  name: "&6&lMenu &7(Right Click)"
+  lore:
+    - "&7Right-click to open the menu!"
+    - ""
+    - "&6&l✦ &eSoulbound"

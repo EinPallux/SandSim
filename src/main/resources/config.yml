@@ -1,0 +1,22 @@
+# SandSim Configuration File
+
+# Plugin Settings
+plugin:
+  prefix: "&#CCBD70&lSANDSIM &7➠&r "
+  
+# Sand Block Settings
+sand-block:
+  material: SAND
+  cooldown-material: BEDROCK
+
+# Rebirth Settings
+rebirth:
+  cost: "1000"
+  multiplier-per-rebirth: 0.01  # 0.01 per rebirth = 1.01x multiplier
+
+# Factory Settings
+factory:
+  unlock-cost: "10000"
+
+# Auto-save interval (in ticks, 20 ticks = 1 second)
+auto-save-interval: 12000  # 10 minutes
