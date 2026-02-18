@@ -33,6 +33,7 @@ messages:
   # Factory
   factory-unlocked: "&a&l✓ Factory unlocked successfully!"
   cannot-afford-factory: "&cYou cannot afford to unlock the factory!"
+  factory-level-required: "&cYou must be at least &eLevel %level% &cto unlock the factory!"
 
   # Admin
   reload-success: "&a&l✓ Plugin reloaded successfully!"

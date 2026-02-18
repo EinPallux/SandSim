@@ -3,7 +3,7 @@
 # Plugin Settings
 plugin:
   prefix: "&#CCBD70&lSANDSIM &7➠&r "
-  
+
 # Sand Block Settings
 sand-block:
   material: SAND
@@ -17,6 +17,7 @@ rebirth:
 # Factory Settings
 factory:
   unlock-cost: "10000"
+  unlock-level: 50   # Minimum player level required to unlock the factory
 
 # Auto-save interval (in ticks, 20 ticks = 1 second)
 auto-save-interval: 12000  # 10 minutes

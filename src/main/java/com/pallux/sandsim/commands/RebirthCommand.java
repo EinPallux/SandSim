@@ -27,6 +27,10 @@ public class RebirthCommand implements CommandExecutor {
         }
 
         if (plugin.getRebirthManager().performRebirth(data, maxRebirths)) {
+            // Rebirth resets the Efficiency upgrade to 0, so we must re-issue the
+            // shovel immediately — otherwise the player keeps the old enchanted shovel.
+            plugin.getShovelManager().refreshShovel(player);
+
             plugin.getMessageManager().sendMessage(player, "messages.rebirth-success", "%amount%", String.valueOf(maxRebirths));
             plugin.getMessageManager().sendMessage(player, "messages.rebirth-multiplier", "%multiplier%", String.format("%.2fx", plugin.getRebirthManager().getRebirthMultiplier(data)));
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);

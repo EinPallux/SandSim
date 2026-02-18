@@ -373,24 +373,39 @@ factory:
     slot: 4
     material: BARRIER
     name: "&c&lFactory Locked"
+    # Shown when the player meets the level requirement AND can afford it
     lore:
       - "&8ꜰᴀᴄᴛᴏʀʏ ᴍᴇɴᴜ"
       - ""
       - "&7Unlock the Sand Factory to"
-      - "&7generate passive Sandbucks!"
+      - "&7generate passive Sandbucks while online!"
       - ""
+      - "&7Required Level: &a%req_level% &7(Your Level: &e%level%&7)"
       - "&7Cost: &e%cost% Sand"
       - ""
       - "&aClick to unlock!"
+    # Shown when the player meets the level requirement but cannot afford it
     lore-cannot-afford:
       - "&8ꜰᴀᴄᴛᴏʀʏ ᴍᴇɴᴜ"
       - ""
       - "&7Unlock the Sand Factory to"
-      - "&7generate passive Sandbucks!"
+      - "&7generate passive Sandbucks while online!"
       - ""
+      - "&7Required Level: &a%req_level% &7(Your Level: &e%level%&7)"
       - "&7Cost: &e%cost% Sand"
       - ""
       - "&cNot enough sand!"
+    # Shown when the player has NOT yet reached the required level
+    lore-no-level:
+      - "&8ꜰᴀᴄᴛᴏʀʏ ᴍᴇɴᴜ"
+      - ""
+      - "&7Unlock the Sand Factory to"
+      - "&7generate passive Sandbucks while online!"
+      - ""
+      - "&7Required Level: &c%req_level% &7(Your Level: &e%level%&7)"
+      - "&7Cost: &e%cost% Sand"
+      - ""
+      - "&cYou must reach Level %req_level% first!"
 
   core:
     slot: 4
@@ -403,6 +418,8 @@ factory:
       - "&7Production Amount: &e%amount%"
       - ""
       - "&7Next Production: &a%time%s"
+      - ""
+      - "&8✦ Only produces while you are online"
 
   production-speed:
     slot: 19

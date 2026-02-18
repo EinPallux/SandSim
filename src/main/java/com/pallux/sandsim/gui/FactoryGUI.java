@@ -39,20 +39,43 @@ public class FactoryGUI extends BaseGUI {
     }
 
     private void buildUnlockItem(Player player, PlayerData data, FileConfiguration cfg) {
-        String path    = SEC + ".unlock";
-        String costStr = formatNumber(plugin.getFactoryManager().getFactoryUnlockCost());
-        boolean can    = plugin.getFactoryManager().canUnlockFactory(data);
-        Material mat   = parseMaterial(cfg.getString(path + ".material", "BARRIER"), Material.BARRIER);
-        String   name  = cfg.getString(path + ".name", "&c&lFactory Locked");
-        String lorePath = can ? path + ".lore" : path + ".lore-cannot-afford";
+        String path      = SEC + ".unlock";
+        String costStr   = formatNumber(plugin.getFactoryManager().getFactoryUnlockCost());
+        int    reqLevel  = plugin.getFactoryManager().getFactoryUnlockLevel();
+        boolean meetsLevel = plugin.getFactoryManager().meetsLevelRequirement(data);
+        boolean canAfford  = data.getSand().compareTo(plugin.getFactoryManager().getFactoryUnlockCost()) >= 0;
+        boolean canUnlock  = meetsLevel && canAfford;
+
+        Material mat  = parseMaterial(cfg.getString(path + ".material", "BARRIER"), Material.BARRIER);
+        String   name = cfg.getString(path + ".name", "&c&lFactory Locked");
+
+        // Pick the most specific lore key available, falling back gracefully.
+        String lorePath;
+        if (!meetsLevel) {
+            lorePath = path + ".lore-no-level";
+        } else if (!canAfford) {
+            lorePath = path + ".lore-cannot-afford";
+        } else {
+            lorePath = path + ".lore";
+        }
+
+        // If the specific key has no entries, fall back to the base lore key so
+        // the GUI never shows an empty item.
         List<String> rawLore = cfg.getStringList(lorePath);
+        if (rawLore.isEmpty()) rawLore = cfg.getStringList(path + ".lore");
+
         List<String> lore = new ArrayList<>();
-        for (String line : rawLore) lore.add(applyPlaceholders(line, "%cost%", costStr));
+        for (String line : rawLore) {
+            lore.add(applyPlaceholders(line,
+                    "%cost%",      costStr,
+                    "%req_level%", String.valueOf(reqLevel),
+                    "%level%",     String.valueOf(data.getLevel())));
+        }
         inventory.setItem(slotFromConfig(path, 13), createItem(mat, name, lore));
     }
 
     private void buildCoreItem(PlayerData data, FileConfiguration cfg) {
-        String path = SEC + ".core";
+        String path   = SEC + ".core";
         double speed  = plugin.getUpgradeManager().getFactoryProductionSpeed(data);
         double amount = plugin.getUpgradeManager().getFactoryProductionAmount(data);
         long   timeMs = plugin.getFactoryManager().getTimeUntilNextProduction(data);
@@ -70,7 +93,7 @@ public class FactoryGUI extends BaseGUI {
 
     private void buildFactoryUpgrade(Player player, PlayerData data, String key, UpgradeType type, int defaultSlot) {
         FileConfiguration cfg = plugin.getConfigManager().getGuiConfig();
-        String path = SEC + "." + key;
+        String path        = SEC + "." + key;
         int        currentLevel = data.getUpgradeLevel(type);
         int        maxLevel     = plugin.getUpgradeManager().getMaxLevel(type);
         BigDecimal cost         = plugin.getUpgradeManager().getUpgradeCost(type, currentLevel);
@@ -106,8 +129,15 @@ public class FactoryGUI extends BaseGUI {
 
         if (slot == slotFromConfig(SEC + ".back", 49)) { new MenuGUI(plugin).open(player); return; }
 
-        int coreSlot = slotFromConfig(SEC + ".unlock", 4);
-        if (slot == coreSlot && !data.isFactoryUnlocked()) {
+        int unlockSlot = slotFromConfig(SEC + ".unlock", 4);
+        if (slot == unlockSlot && !data.isFactoryUnlocked()) {
+            // Level check first — gives a clearer message if the player can't unlock yet.
+            if (!plugin.getFactoryManager().meetsLevelRequirement(data)) {
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                plugin.getMessageManager().sendMessage(player, "messages.factory-level-required",
+                        "%level%", String.valueOf(plugin.getFactoryManager().getFactoryUnlockLevel()));
+                return;
+            }
             if (plugin.getFactoryManager().unlockFactory(data)) {
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
                 plugin.getMessageManager().sendMessage(player, "messages.factory-unlocked");
