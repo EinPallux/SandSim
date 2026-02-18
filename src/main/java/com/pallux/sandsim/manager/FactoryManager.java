@@ -26,18 +26,12 @@ public class FactoryManager {
         this.factoryUnlockLevel = config.getInt("factory.unlock-level", 50);
     }
 
-    /**
-     * Returns true only if the player has enough sand AND meets the level requirement.
-     */
     public boolean canUnlockFactory(PlayerData data) {
         if (data.isFactoryUnlocked()) return false;
         if (data.getLevel() < factoryUnlockLevel) return false;
         return data.getSand().compareTo(factoryUnlockCost) >= 0;
     }
 
-    /**
-     * Returns true if the player meets the level requirement (regardless of sand).
-     */
     public boolean meetsLevelRequirement(PlayerData data) {
         return data.getLevel() >= factoryUnlockLevel;
     }
@@ -51,13 +45,11 @@ public class FactoryManager {
     }
 
     /**
-     * Called every second by the async task. Only processes production for
-     * players who are currently online — offline players are skipped entirely.
+     * Called every second. Only processes online players so offline players
+     * never accumulate Sandbucks passively.
      */
     public void processFactoryProduction() {
         long currentTime = System.currentTimeMillis();
-        // Bukkit.getOnlinePlayers() already returns only online players,
-        // so production never accumulates while a player is offline.
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerData data = plugin.getDataManager().getPlayerData(player);
             if (!data.isFactoryUnlocked()) continue;
@@ -68,26 +60,24 @@ public class FactoryManager {
     private void processPlayerFactory(PlayerData data, long currentTime) {
         long lastProduction = data.getLastFactoryProduction();
 
-        // Base production speed, then apply event speed bonus
         double productionSpeed = plugin.getUpgradeManager().getFactoryProductionSpeed(data);
-        double speedBonus      = plugin.getEventManager().getFactorySpeedBonus(); // e.g. 0.5 = 50% faster
-        // Faster = shorter interval. A 50% speed bonus = interval * (1 / 1.5)
+        double speedBonus      = plugin.getEventManager().getFactorySpeedBonus();
         double effectiveSpeed  = productionSpeed / (1.0 + speedBonus);
-        if (effectiveSpeed < 0.05) effectiveSpeed = 0.05; // hard minimum 50ms
+        if (effectiveSpeed < 0.05) effectiveSpeed = 0.05;
 
         long productionInterval = (long) (effectiveSpeed * 1000);
         long timePassed         = currentTime - lastProduction;
         int  cycles             = (int) (timePassed / productionInterval);
 
         if (cycles > 0) {
-            double baseAmount      = plugin.getUpgradeManager().getFactoryProductionAmount(data);
-            double productionBonus = plugin.getEventManager().getFactoryProductionBonus(); // e.g. 0.5
-            double totalAmount     = baseAmount * (1.0 + productionBonus);
+            double baseAmount          = plugin.getUpgradeManager().getFactoryProductionAmount(data);
+            double productionBonus     = plugin.getEventManager().getFactoryProductionBonus();
+            // Augment sandbucks multiplier (e.g. 1.01 = +1%)
+            double augmentSandbucksMult = plugin.getAugmentManager().getSandbucksMultiplier(data);
+            double totalAmount          = baseAmount * (1.0 + productionBonus) * augmentSandbucksMult;
 
             BigDecimal total = BigDecimal.valueOf(totalAmount * cycles);
             data.addSandbucks(total);
-            // Advance the timestamp by exactly the ticks we consumed so that
-            // any remainder carries over to the next second correctly.
             data.setLastFactoryProduction(lastProduction + ((long) cycles * productionInterval));
         }
     }
@@ -113,16 +103,13 @@ public class FactoryManager {
 
     public long getTimeUntilNextProduction(PlayerData data) {
         if (!data.isFactoryUnlocked()) return -1;
-
         long   currentTime        = System.currentTimeMillis();
         long   lastProduction     = data.getLastFactoryProduction();
         double productionSpeed    = plugin.getUpgradeManager().getFactoryProductionSpeed(data);
         double speedBonus         = plugin.getEventManager().getFactorySpeedBonus();
         double effectiveSpeed     = productionSpeed / (1.0 + speedBonus);
         long   productionInterval = (long) (effectiveSpeed * 1000);
-
-        long timePassed    = currentTime - lastProduction;
-        long timeRemaining = productionInterval - (timePassed % productionInterval);
-        return timeRemaining;
+        long   timePassed         = currentTime - lastProduction;
+        return productionInterval - (timePassed % productionInterval);
     }
 }

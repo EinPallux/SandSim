@@ -32,6 +32,14 @@ public class PlayerData {
     private int factoryProductionAmount;
     private long lastFactoryProduction;
 
+    // ── Augments (do NOT reset on rebirth) ───────────────────────────────────
+    /** The highest tier that has been fully researched (0 = none). */
+    private int augmentUnlockedTier;
+    /** The tier currently being researched (0 = not researching). */
+    private int augmentResearchingTier;
+    /** Epoch millis when the current research will complete (0 when not researching). */
+    private long augmentResearchCompleteTime;
+
     public PlayerData(UUID uuid) {
         this.uuid = uuid;
         this.sand = BigDecimal.ZERO;
@@ -54,9 +62,13 @@ public class PlayerData {
         this.factoryProductionSpeed = 0;
         this.factoryProductionAmount = 0;
         this.lastFactoryProduction = System.currentTimeMillis();
+
+        this.augmentUnlockedTier = 0;
+        this.augmentResearchingTier = 0;
+        this.augmentResearchCompleteTime = 0L;
     }
 
-    // ---- Currency methods ----
+    // ── Currency methods ──────────────────────────────────────────────────────
 
     public void addSand(BigDecimal amount) {
         this.sand = this.sand.add(amount);
@@ -89,19 +101,12 @@ public class PlayerData {
         this.rebirths += amount;
     }
 
-    // ---- Leveling methods ----
+    // ── Leveling methods ──────────────────────────────────────────────────────
 
-    /**
-     * Returns how much XP is needed to reach the next level from the given level.
-     * Formula: level * 10
-     */
     public long getXpForNextLevel() {
         return (long) level * 10L;
     }
 
-    /**
-     * Add XP and handle level-ups. Returns how many levels were gained.
-     */
     public int addXp(long amount) {
         this.xp += amount;
         int levelsGained = 0;
@@ -113,16 +118,13 @@ public class PlayerData {
         return levelsGained;
     }
 
-    /**
-     * Returns the percentage of XP progress to the next level (0-100).
-     */
     public int getXpPercent() {
         long needed = getXpForNextLevel();
         if (needed <= 0) return 100;
         return (int) ((xp * 100L) / needed);
     }
 
-    // ---- Upgrade methods ----
+    // ── Upgrade methods ───────────────────────────────────────────────────────
 
     public void upgradeLevel(UpgradeType type, int levels) {
         switch (type) {
@@ -174,6 +176,7 @@ public class PlayerData {
         this.gemChance            = 0;
         this.gemMultiplier        = 0;
         this.efficiency           = 0;
+        // Note: augments are NOT reset here — they persist through rebirths
     }
 
     public void resetAll() {
@@ -187,9 +190,14 @@ public class PlayerData {
         this.factoryUnlocked          = false;
         this.factoryProductionSpeed   = 0;
         this.factoryProductionAmount  = 0;
+        // Augments survive a full /sandsim restart as well — comment out the
+        // three lines below if you want to wipe them on a full reset too.
+        // this.augmentUnlockedTier        = 0;
+        // this.augmentResearchingTier     = 0;
+        // this.augmentResearchCompleteTime = 0L;
     }
 
-    // ---- Serialization ----
+    // ── Serialization ─────────────────────────────────────────────────────────
 
     public Map<String, Object> serialize() {
         Map<String, Object> data = new HashMap<>();
@@ -211,6 +219,10 @@ public class PlayerData {
         data.put("factoryProductionSpeed",  factoryProductionSpeed);
         data.put("factoryProductionAmount", factoryProductionAmount);
         data.put("lastFactoryProduction",   lastFactoryProduction);
+        // Augments
+        data.put("augmentUnlockedTier",         augmentUnlockedTier);
+        data.put("augmentResearchingTier",      augmentResearchingTier);
+        data.put("augmentResearchCompleteTime", augmentResearchCompleteTime);
         return data;
     }
 
@@ -224,15 +236,10 @@ public class PlayerData {
         pd.rebirths               = (int)  data.getOrDefault("rebirths",               0);
         pd.level                  = (int)  data.getOrDefault("level",                  1);
 
-        // xp may be stored as Integer or Long depending on YAML loading
         Object xpObj = data.getOrDefault("xp", 0L);
-        if (xpObj instanceof Integer i) {
-            pd.xp = i.longValue();
-        } else if (xpObj instanceof Long l) {
-            pd.xp = l;
-        } else {
-            pd.xp = 0L;
-        }
+        if (xpObj instanceof Integer i)      pd.xp = i.longValue();
+        else if (xpObj instanceof Long l)    pd.xp = l;
+        else                                 pd.xp = 0L;
 
         pd.sandMultiplier         = (int)  data.getOrDefault("sandMultiplier",         0);
         pd.sandExplosionChance    = (int)  data.getOrDefault("sandExplosionChance",    0);
@@ -244,12 +251,24 @@ public class PlayerData {
         pd.factoryUnlocked        = (boolean) data.getOrDefault("factoryUnlocked",    false);
         pd.factoryProductionSpeed = (int)  data.getOrDefault("factoryProductionSpeed",  0);
         pd.factoryProductionAmount= (int)  data.getOrDefault("factoryProductionAmount", 0);
-        pd.lastFactoryProduction  = (long) data.getOrDefault("lastFactoryProduction",   System.currentTimeMillis());
+        pd.lastFactoryProduction  = toLong(data.getOrDefault("lastFactoryProduction",   System.currentTimeMillis()));
+
+        // Augments
+        pd.augmentUnlockedTier         = (int)  data.getOrDefault("augmentUnlockedTier",    0);
+        pd.augmentResearchingTier      = (int)  data.getOrDefault("augmentResearchingTier", 0);
+        pd.augmentResearchCompleteTime = toLong(data.getOrDefault("augmentResearchCompleteTime", 0L));
 
         return pd;
     }
 
-    // ---- Getters / Setters ----
+    /** Safely converts Integer or Long to long. */
+    private static long toLong(Object obj) {
+        if (obj instanceof Long l)    return l;
+        if (obj instanceof Integer i) return i.longValue();
+        return 0L;
+    }
+
+    // ── Getters / Setters ─────────────────────────────────────────────────────
 
     public UUID getUuid()                         { return uuid; }
     public BigDecimal getSand()                   { return sand; }
@@ -267,9 +286,17 @@ public class PlayerData {
     public int getLevel()                         { return level; }
     public void setLevel(int level)               { this.level = level; }
     public long getXp()                           { return xp; }
-    public void setXp(long xp)                    { this.xp = xp; }
+    public void setXp(long xp)                   { this.xp = xp; }
 
-    // ---- Upgrade type enum ----
+    // Augment getters/setters
+    public int  getAugmentUnlockedTier()                      { return augmentUnlockedTier; }
+    public void setAugmentUnlockedTier(int tier)              { this.augmentUnlockedTier = tier; }
+    public int  getAugmentResearchingTier()                   { return augmentResearchingTier; }
+    public void setAugmentResearchingTier(int tier)           { this.augmentResearchingTier = tier; }
+    public long getAugmentResearchCompleteTime()              { return augmentResearchCompleteTime; }
+    public void setAugmentResearchCompleteTime(long millis)   { this.augmentResearchCompleteTime = millis; }
+
+    // ── Upgrade type enum ─────────────────────────────────────────────────────
 
     public enum UpgradeType {
         SAND_MULTIPLIER,

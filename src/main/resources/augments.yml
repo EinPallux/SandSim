@@ -1,0 +1,184 @@
+# ============================================================
+# SandSim Augments Configuration
+# ============================================================
+# Augments are permanent % multipliers that survive Rebirths.
+# Only one Augment can be researched at a time, and they must
+# be unlocked in order (tier by tier).
+#
+# Multipliers are REPLACED each tier, not stacked:
+#   e.g. at Augment II you get +2% Sand total, not +1%+2%.
+#
+# ── Per-Augment Fields ──────────────────────────────────────
+#   sand-percent      : % bonus to all Sand gained (0 = no bonus)
+#   gems-percent      : % bonus to all Gems gained (0 = no bonus)
+#   sandbucks-percent : % bonus to all Sandbucks gained (0 = no bonus)
+#   research-time-seconds : how long research takes (in seconds)
+#   gem-cost          : Gems required to START research
+# ============================================================
+
+augments:
+
+  # ── Augment I ──────────────────────────────────────────────
+  - tier: 1
+    sand-percent: 1.0
+    gems-percent: 0.0
+    sandbucks-percent: 0.0
+    research-time-seconds: 300        # 5 minutes
+    gem-cost: 10
+
+  # ── Augment II ─────────────────────────────────────────────
+  - tier: 2
+    sand-percent: 2.0
+    gems-percent: 1.0
+    sandbucks-percent: 0.0
+    research-time-seconds: 900        # 15 minutes
+    gem-cost: 30
+
+  # ── Augment III ────────────────────────────────────────────
+  - tier: 3
+    sand-percent: 3.0
+    gems-percent: 2.0
+    sandbucks-percent: 1.0
+    research-time-seconds: 1800       # 30 minutes
+    gem-cost: 90
+
+  # ── Augment IV ─────────────────────────────────────────────
+  - tier: 4
+    sand-percent: 4.0
+    gems-percent: 3.0
+    sandbucks-percent: 2.0
+    research-time-seconds: 2700       # 45 minutes
+    gem-cost: 270
+
+  # ── Augment V ──────────────────────────────────────────────
+  - tier: 5
+    sand-percent: 5.0
+    gems-percent: 4.0
+    sandbucks-percent: 3.0
+    research-time-seconds: 3600       # 60 minutes
+    gem-cost: 810
+
+  # ── Augment VI ─────────────────────────────────────────────
+  - tier: 6
+    sand-percent: 6.0
+    gems-percent: 5.0
+    sandbucks-percent: 4.0
+    research-time-seconds: 5400       # 90 minutes
+    gem-cost: 2430
+
+  # ── Augment VII ────────────────────────────────────────────
+  - tier: 7
+    sand-percent: 7.0
+    gems-percent: 6.0
+    sandbucks-percent: 5.0
+    research-time-seconds: 7200       # 2 hours
+    gem-cost: 7290
+
+  # ── Augment VIII ───────────────────────────────────────────
+  - tier: 8
+    sand-percent: 8.0
+    gems-percent: 7.0
+    sandbucks-percent: 6.0
+    research-time-seconds: 10800      # 3 hours
+    gem-cost: 21870
+
+  # ── Augment IX ─────────────────────────────────────────────
+  - tier: 9
+    sand-percent: 9.0
+    gems-percent: 8.0
+    sandbucks-percent: 7.0
+    research-time-seconds: 14400      # 4 hours
+    gem-cost: 65610
+
+  # ── Augment X ──────────────────────────────────────────────
+  - tier: 10
+    sand-percent: 10.0
+    gems-percent: 9.0
+    sandbucks-percent: 8.0
+    research-time-seconds: 18000      # 5 hours
+    gem-cost: 196830
+
+  # ── Augment XI ─────────────────────────────────────────────
+  - tier: 11
+    sand-percent: 11.0
+    gems-percent: 10.0
+    sandbucks-percent: 9.0
+    research-time-seconds: 25200      # 7 hours
+    gem-cost: 590490
+
+  # ── Augment XII ────────────────────────────────────────────
+  - tier: 12
+    sand-percent: 12.0
+    gems-percent: 11.0
+    sandbucks-percent: 10.0
+    research-time-seconds: 32400      # 9 hours
+    gem-cost: 1771470
+
+  # ── Augment XIII ───────────────────────────────────────────
+  - tier: 13
+    sand-percent: 13.0
+    gems-percent: 12.0
+    sandbucks-percent: 11.0
+    research-time-seconds: 43200      # 12 hours
+    gem-cost: 5314410
+
+  # ── Augment XIV ────────────────────────────────────────────
+  - tier: 14
+    sand-percent: 14.0
+    gems-percent: 13.0
+    sandbucks-percent: 12.0
+    research-time-seconds: 54000      # 15 hours
+    gem-cost: 15943230
+
+  # ── Augment XV ─────────────────────────────────────────────
+  - tier: 15
+    sand-percent: 15.0
+    gems-percent: 14.0
+    sandbucks-percent: 13.0
+    research-time-seconds: 64800      # 18 hours
+    gem-cost: 47829690
+
+  # ── Augment XVI ────────────────────────────────────────────
+  - tier: 16
+    sand-percent: 16.0
+    gems-percent: 15.0
+    sandbucks-percent: 14.0
+    research-time-seconds: 72000      # 20 hours
+    gem-cost: 143489070
+
+  # ── Augment XVII ───────────────────────────────────────────
+  - tier: 17
+    sand-percent: 17.0
+    gems-percent: 16.0
+    sandbucks-percent: 15.0
+    research-time-seconds: 79200      # 22 hours
+    gem-cost: 430467210
+
+  # ── Augment XVIII ──────────────────────────────────────────
+  - tier: 18
+    sand-percent: 18.0
+    gems-percent: 17.0
+    sandbucks-percent: 16.0
+    research-time-seconds: 86400      # 24 hours
+    gem-cost: 1291401630
+
+  # ── Augment XIX ────────────────────────────────────────────
+  - tier: 19
+    sand-percent: 19.0
+    gems-percent: 18.0
+    sandbucks-percent: 17.0
+    research-time-seconds: 90000      # 25 hours
+    gem-cost: 3874204890
+
+  # ── Augment XX ─────────────────────────────────────────────
+  - tier: 20
+    sand-percent: 20.0
+    gems-percent: 19.0
+    sandbucks-percent: 18.0
+    research-time-seconds: 93600      # 26 hours
+    gem-cost: 11622614670
+
+# ============================================================
+# To add more Augments simply copy a block above and increment
+# the tier number. The GUI will page automatically.
+# ============================================================

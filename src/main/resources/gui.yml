@@ -8,13 +8,15 @@ menu:
   filler:
     enabled: true
     material: GRAY_STAINED_GLASS_PANE
-    slots: [0,1,2,4,6,7,8,9,10,11,12,14,15,16,17,18,19,20,21,22,23,24,25,26,27,35,36,44,45,46,47,48,49,50,51,52,53]
+    slots: [0,1,2,4,6,7,8,9,10,11,12,14,15,16,17,18,19,20,21,22,23,24,25,26,27,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53]
 
   stats:
     slot: 3
     material: PLAYER_HEAD
     name: "&e&lYour Stats"
     lore:
+      - "&8ᴅᴀꜱʜʙᴏᴀʀᴅ ᴍᴇɴᴜ"
+      - ""
       - "&7Sand: &e%sand%"
       - "&7Gems: &b%gems%"
       - "&7Sandbucks: &6%sandbucks%"
@@ -36,6 +38,7 @@ menu:
       - "&e3. &7Collect gems for bonuses"
       - "&e4. &7Rebirth to gain permanent multipliers"
       - "&e5. &7Unlock the factory for passive income"
+      - "&e6. &7Research Augments for % bonuses"
       - ""
       - "&aHave fun!"
 
@@ -83,8 +86,21 @@ menu:
       - ""
       - "&eClick to open!"
 
+  augments:
+    slot: 31
+    material: EXPERIENCE_BOTTLE
+    name: "&5&lAugments"
+    lore:
+      - "&8ᴅᴀꜱʜʙᴏᴀʀᴅ ᴍᴇɴᴜ"
+      - ""
+      - "&7Research permanent % multipliers"
+      - "&7for Sand, Gems & Sandbucks!"
+      - "&7Augments survive Rebirths!"
+      - ""
+      - "&eClick to open!"
+
   leaderboard:
-    slot: 30
+    slot: 33
     material: GOLD_INGOT
     name: "&e&lLeaderboard"
     lore:
@@ -100,7 +116,124 @@ menu:
     material: GRAY_DYE
     name: "&7&o???"
     lore: []
-    slots: [31,32,33,34,37,38,39,40,41,42,43]
+    slots: [30,32,34]
+
+# ============================================================
+# AUGMENTS GUI
+# ============================================================
+# Available placeholders for ALL lore/name fields below:
+#   %name%          – augment display name (e.g. "Augment III")
+#   %tier%          – numeric tier (e.g. 3)
+#   %sand%          – sand % bonus (e.g. "3")
+#   %gems%          – gems % bonus
+#   %sandbucks%     – sandbucks % bonus
+#   %cost%          – gem cost to research
+#   %time%          – total research time formatted (e.g. "30m")
+#   %remaining%     – time remaining (researching state only)
+#   %unlocked_tier% – player's currently unlocked tier number
+#   %researching%   – tier currently being researched (0 if none)
+# ============================================================
+augments:
+  title: "SandSim ➠ Augments"
+  size: 54
+
+  # ── Filler item (fills all non-augment, non-nav slots) ───────────────────
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    name: " "
+
+  # ── Navigation buttons ────────────────────────────────────────────────────
+  back:
+    material: BARRIER
+    name: "&c&lBack to Menu"
+    lore:
+      - "&7Return to the main menu"
+
+  prev-page:
+    material: ARROW
+    name: "&c&l← Previous Page"
+    lore:
+      - "&7Go to page %page%"
+
+  next-page:
+    material: ARROW
+    name: "&a&lNext Page →"
+    lore:
+      - "&7Go to page %page%"
+
+  # ── Per-state item appearance ─────────────────────────────────────────────
+  # Each state block defines the material, display name, and lore for
+  # augments in that particular state. Edit freely.
+  #
+  # States:
+  #   unlocked    – player has fully researched this augment
+  #   researching – player is currently researching this augment
+  #   available   – next in line, player can start research now
+  #   locked      – not yet reachable (previous augment not done)
+  # ──────────────────────────────────────────────────────────────────────────
+  states:
+
+    unlocked:
+      material: GREEN_STAINED_GLASS_PANE
+      name: "&a&l%name%"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ"
+        - ""
+        - "&7Bonuses &8(active, replaces previous)&7:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&a✔ &aResearched & Active"
+
+    researching:
+      material: YELLOW_STAINED_GLASS_PANE
+      name: "&e&l%name% &7(Researching)"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ"
+        - ""
+        - "&7Bonuses on completion:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&e⏳ Researching..."
+        - "&7Time remaining: &e%remaining%"
+        - ""
+        - "&7Click to see progress."
+
+    available:
+      material: YELLOW_STAINED_GLASS_PANE
+      name: "&e&l%name% &7(Available)"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ"
+        - ""
+        - "&7Bonuses on unlock:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&7Research Cost: &b%cost% Gems"
+        - "&7Research Time: &e%time%"
+        - ""
+        - "&aClick to start research!"
+
+    locked:
+      material: RED_STAINED_GLASS_PANE
+      name: "&c&l%name% &7(Locked)"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ"
+        - ""
+        - "&7Bonuses on unlock:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&7Research Cost: &b%cost% Gems"
+        - "&7Research Time: &e%time%"
+        - ""
+        - "&c✖ Locked"
+        - "&7Research the previous Augment first."
 
 # ============================================================
 # UPGRADES GUI
@@ -373,7 +506,6 @@ factory:
     slot: 4
     material: BARRIER
     name: "&c&lFactory Locked"
-    # Shown when the player meets the level requirement AND can afford it
     lore:
       - "&8ꜰᴀᴄᴛᴏʀʏ ᴍᴇɴᴜ"
       - ""
@@ -384,7 +516,6 @@ factory:
       - "&7Cost: &e%cost% Sand"
       - ""
       - "&aClick to unlock!"
-    # Shown when the player meets the level requirement but cannot afford it
     lore-cannot-afford:
       - "&8ꜰᴀᴄᴛᴏʀʏ ᴍᴇɴᴜ"
       - ""
@@ -395,7 +526,6 @@ factory:
       - "&7Cost: &e%cost% Sand"
       - ""
       - "&cNot enough sand!"
-    # Shown when the player has NOT yet reached the required level
     lore-no-level:
       - "&8ꜰᴀᴄᴛᴏʀʏ ᴍᴇɴᴜ"
       - ""

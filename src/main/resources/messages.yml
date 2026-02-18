@@ -35,6 +35,13 @@ messages:
   cannot-afford-factory: "&cYou cannot afford to unlock the factory!"
   factory-level-required: "&cYou must be at least &eLevel %level% &cto unlock the factory!"
 
+  # Augments
+  augment-research-started: "&a&l✦ Research started! &7%augment% will be ready in &e%time%&7."
+  augment-research-complete: "&a&l✦ Research complete! &7%augment% &ais now active!"
+  augment-cannot-afford: "&cYou need &b%cost% Gems &cto research this Augment!"
+  augment-already-researching: "&cAlready researching! Time remaining: &e%time%"
+  augment-locked: "&cYou must research the previous Augment first!"
+
   # Admin
   reload-success: "&a&l✓ Plugin reloaded successfully!"
   player-not-found: "&cPlayer not found!"

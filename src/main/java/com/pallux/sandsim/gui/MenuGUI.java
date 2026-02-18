@@ -46,8 +46,10 @@ public class MenuGUI extends BaseGUI {
                 createItem(parseMaterial(cfg.getString(SEC + ".rebirth.material", "NETHER_STAR"), org.bukkit.Material.NETHER_STAR),
                         cfg.getString(SEC + ".rebirth.name", "&d&lRebirth"), rebirthLore));
 
-        inventory.setItem(slotFromConfig(SEC + ".upgrades",    29), itemFromConfig(SEC + ".upgrades"));
-        inventory.setItem(slotFromConfig(SEC + ".factory",     31), itemFromConfig(SEC + ".factory"));
+        // Row 3 buttons
+        inventory.setItem(slotFromConfig(SEC + ".upgrades",    28), itemFromConfig(SEC + ".upgrades"));
+        inventory.setItem(slotFromConfig(SEC + ".factory",     29), itemFromConfig(SEC + ".factory"));
+        inventory.setItem(slotFromConfig(SEC + ".augments",    31), itemFromConfig(SEC + ".augments"));
         inventory.setItem(slotFromConfig(SEC + ".leaderboard", 33), itemFromConfig(SEC + ".leaderboard"));
 
         applyPlaceholderItems(SEC);
@@ -59,8 +61,9 @@ public class MenuGUI extends BaseGUI {
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
 
         if      (slot == slotFromConfig(SEC + ".rebirth",     15)) { player.closeInventory(); player.performCommand("rebirth"); }
-        else if (slot == slotFromConfig(SEC + ".upgrades",    29)) { new UpgradesGUI(plugin).open(player); }
-        else if (slot == slotFromConfig(SEC + ".factory",     31)) { new FactoryGUI(plugin).open(player); }
+        else if (slot == slotFromConfig(SEC + ".upgrades",    28)) { new UpgradesGUI(plugin).open(player); }
+        else if (slot == slotFromConfig(SEC + ".factory",     29)) { new FactoryGUI(plugin).open(player); }
+        else if (slot == slotFromConfig(SEC + ".augments",    31)) { new AugmentsGUI(plugin).open(player); }
         else if (slot == slotFromConfig(SEC + ".leaderboard", 33)) { new LeaderboardGUI(plugin).open(player); }
     }
 }

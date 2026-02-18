@@ -48,37 +48,41 @@ public class BlockBreakListener implements Listener {
     }
 
     private void processSandMining(Player player, PlayerData data, BlockBreakEvent event) {
-        // --- Sand calculation ---
-        double sandMultiplier   = plugin.getUpgradeManager().getSandMultiplier(data);
-        double rebirthMultiplier = plugin.getRebirthManager().getRebirthMultiplier(data);
-        // Event bonus is additive on top of all multipliers: total * (1 + eventBonus)
-        double eventSandBonus   = plugin.getEventManager().getSandBonus();
-        double totalMultiplier  = sandMultiplier * rebirthMultiplier * (1.0 + eventSandBonus);
+        // ── Sand calculation ───────────────────────────────────────────────
+        double sandUpgradeMultiplier = plugin.getUpgradeManager().getSandMultiplier(data);
+        double rebirthMultiplier     = plugin.getRebirthManager().getRebirthMultiplier(data);
+        double eventSandBonus        = plugin.getEventManager().getSandBonus();
+        // Augment multiplier (e.g. 1.02 = +2%)
+        double augmentSandMultiplier = plugin.getAugmentManager().getSandMultiplier(data);
+
+        double totalMultiplier = sandUpgradeMultiplier
+                * rebirthMultiplier
+                * (1.0 + eventSandBonus)
+                * augmentSandMultiplier;
 
         BigDecimal sandAmount = BigDecimal.valueOf(totalMultiplier);
         data.addSand(sandAmount);
 
-        // --- Leveling ---
+        // ── Leveling ───────────────────────────────────────────────────────
         long xpGain = 1L + (long) plugin.getEventManager().getXpBonus();
         int levelsGained = data.addXp(xpGain);
 
-        // Notify level-up
         if (levelsGained > 0) {
             plugin.getMessageManager().sendMessage(player, "messages.level-up",
                     "%level%", String.valueOf(data.getLevel()));
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
         }
 
-        // Cooldown
+        // ── Cooldown ───────────────────────────────────────────────────────
         plugin.getSandBlockManager().setCooldown(event.getBlock().getLocation(), data);
 
-        // Explosion
+        // ── Explosion ──────────────────────────────────────────────────────
         checkSandExplosion(player, data, event);
 
-        // Gems
+        // ── Gems ───────────────────────────────────────────────────────────
         checkGemDrop(player, data);
 
-        // Action bar feedback
+        // ── Action bar feedback ────────────────────────────────────────────
         plugin.getMessageManager().sendActionBar(player, "messages.sand-mined",
                 "%amount%", NumberFormatter.format(sandAmount));
 
@@ -93,15 +97,15 @@ public class BlockBreakListener implements Listener {
             int radius = plugin.getUpgradeManager().getSandExplosionRadius(data);
             int blocksExploded = breakSandInRadius(event.getBlock().getLocation(), radius, data);
 
-            double sandMultiplier    = plugin.getUpgradeManager().getSandMultiplier(data);
-            double rebirthMultiplier = plugin.getRebirthManager().getRebirthMultiplier(data);
+            double sandUpgrade       = plugin.getUpgradeManager().getSandMultiplier(data);
+            double rebirthMult       = plugin.getRebirthManager().getRebirthMultiplier(data);
             double eventSandBonus    = plugin.getEventManager().getSandBonus();
-            double totalMultiplier   = sandMultiplier * rebirthMultiplier * (1.0 + eventSandBonus);
+            double augmentSandMult   = plugin.getAugmentManager().getSandMultiplier(data);
+            double totalMultiplier   = sandUpgrade * rebirthMult * (1.0 + eventSandBonus) * augmentSandMult;
 
             BigDecimal explosionSand = BigDecimal.valueOf(totalMultiplier * blocksExploded);
             data.addSand(explosionSand);
 
-            // XP for each exploded block
             if (blocksExploded > 0) {
                 long xpGain = blocksExploded * (1L + (long) plugin.getEventManager().getXpBonus());
                 data.addXp(xpGain);
@@ -139,16 +143,18 @@ public class BlockBreakListener implements Listener {
     }
 
     private void checkGemDrop(Player player, PlayerData data) {
-        double gemChance = plugin.getUpgradeManager().getGemChance(data);
-        // Event adds a flat bonus chance
-        double eventGemBonus = plugin.getEventManager().getGemChanceBonus() * 100.0; // convert to %
+        double gemChance      = plugin.getUpgradeManager().getGemChance(data);
+        double eventGemBonus  = plugin.getEventManager().getGemChanceBonus() * 100.0;
         double totalGemChance = gemChance + eventGemBonus;
 
         if (totalGemChance <= 0) return;
 
         if (random.nextDouble() * 100 < totalGemChance) {
-            double gemMultiplier = plugin.getUpgradeManager().getGemMultiplier(data);
-            BigDecimal gemAmount = BigDecimal.valueOf(gemMultiplier);
+            double gemUpgradeMultiplier  = plugin.getUpgradeManager().getGemMultiplier(data);
+            // Augment multiplier for gems (e.g. 1.01 = +1%)
+            double augmentGemsMultiplier = plugin.getAugmentManager().getGemsMultiplier(data);
+
+            BigDecimal gemAmount = BigDecimal.valueOf(gemUpgradeMultiplier * augmentGemsMultiplier);
             data.addGems(gemAmount);
 
             plugin.getMessageManager().sendMessage(player, "messages.gem-found",

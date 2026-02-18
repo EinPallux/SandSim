@@ -30,6 +30,7 @@ public class ConfigManager {
         saveDefaultConfig("items.yml");
         saveDefaultConfig("upgrades.yml");
         saveDefaultConfig("events.yml");
+        saveDefaultConfig("augments.yml");
 
         loadConfig("config.yml");
         loadConfig("messages.yml");
@@ -37,6 +38,7 @@ public class ConfigManager {
         loadConfig("items.yml");
         loadConfig("upgrades.yml");
         loadConfig("events.yml");
+        loadConfig("augments.yml");
     }
 
     private void saveDefaultConfig(String fileName) {
@@ -96,4 +98,5 @@ public class ConfigManager {
     public FileConfiguration getItemsConfig()    { return getConfig("items.yml"); }
     public FileConfiguration getUpgradesConfig() { return getConfig("upgrades.yml"); }
     public FileConfiguration getEventsConfig()   { return getConfig("events.yml"); }
+    public FileConfiguration getAugmentsConfig() { return getConfig("augments.yml"); }
 }

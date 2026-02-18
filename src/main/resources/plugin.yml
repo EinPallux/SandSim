@@ -24,6 +24,10 @@ commands:
     description: Opens the upgrades menu
     usage: /upgrades
     permission: sandsim.player
+  augments:
+    description: Opens the augments menu
+    usage: /augments
+    permission: sandsim.player
   sandbucks:
     description: Check your sandbucks balance
     usage: /sandbucks
