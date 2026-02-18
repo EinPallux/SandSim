@@ -32,7 +32,7 @@ augments:
     gems-percent: 1.0
     sandbucks-percent: 0.0
     research-time-seconds: 900        # 15 minutes
-    gem-cost: 30
+    gem-cost: 100
 
   # ── Augment III ────────────────────────────────────────────
   - tier: 3
@@ -40,7 +40,7 @@ augments:
     gems-percent: 2.0
     sandbucks-percent: 1.0
     research-time-seconds: 1800       # 30 minutes
-    gem-cost: 90
+    gem-cost: 1000
 
   # ── Augment IV ─────────────────────────────────────────────
   - tier: 4
@@ -48,7 +48,7 @@ augments:
     gems-percent: 3.0
     sandbucks-percent: 2.0
     research-time-seconds: 2700       # 45 minutes
-    gem-cost: 270
+    gem-cost: 10000
 
   # ── Augment V ──────────────────────────────────────────────
   - tier: 5
@@ -56,7 +56,7 @@ augments:
     gems-percent: 4.0
     sandbucks-percent: 3.0
     research-time-seconds: 3600       # 60 minutes
-    gem-cost: 810
+    gem-cost: 100000
 
   # ── Augment VI ─────────────────────────────────────────────
   - tier: 6
@@ -64,7 +64,7 @@ augments:
     gems-percent: 5.0
     sandbucks-percent: 4.0
     research-time-seconds: 5400       # 90 minutes
-    gem-cost: 2430
+    gem-cost: 1000000
 
   # ── Augment VII ────────────────────────────────────────────
   - tier: 7
@@ -72,7 +72,7 @@ augments:
     gems-percent: 6.0
     sandbucks-percent: 5.0
     research-time-seconds: 7200       # 2 hours
-    gem-cost: 7290
+    gem-cost: 10000000
 
   # ── Augment VIII ───────────────────────────────────────────
   - tier: 8
@@ -80,7 +80,7 @@ augments:
     gems-percent: 7.0
     sandbucks-percent: 6.0
     research-time-seconds: 10800      # 3 hours
-    gem-cost: 21870
+    gem-cost: 15000000
 
   # ── Augment IX ─────────────────────────────────────────────
   - tier: 9
@@ -88,7 +88,7 @@ augments:
     gems-percent: 8.0
     sandbucks-percent: 7.0
     research-time-seconds: 14400      # 4 hours
-    gem-cost: 65610
+    gem-cost: 20000000
 
   # ── Augment X ──────────────────────────────────────────────
   - tier: 10
@@ -96,7 +96,7 @@ augments:
     gems-percent: 9.0
     sandbucks-percent: 8.0
     research-time-seconds: 18000      # 5 hours
-    gem-cost: 196830
+    gem-cost: 25000000
 
   # ── Augment XI ─────────────────────────────────────────────
   - tier: 11
@@ -104,7 +104,7 @@ augments:
     gems-percent: 10.0
     sandbucks-percent: 9.0
     research-time-seconds: 25200      # 7 hours
-    gem-cost: 590490
+    gem-cost: 30000000
 
   # ── Augment XII ────────────────────────────────────────────
   - tier: 12
@@ -112,7 +112,7 @@ augments:
     gems-percent: 11.0
     sandbucks-percent: 10.0
     research-time-seconds: 32400      # 9 hours
-    gem-cost: 1771470
+    gem-cost: 35000000
 
   # ── Augment XIII ───────────────────────────────────────────
   - tier: 13
@@ -120,7 +120,7 @@ augments:
     gems-percent: 12.0
     sandbucks-percent: 11.0
     research-time-seconds: 43200      # 12 hours
-    gem-cost: 5314410
+    gem-cost: 40000000
 
   # ── Augment XIV ────────────────────────────────────────────
   - tier: 14
@@ -128,7 +128,7 @@ augments:
     gems-percent: 13.0
     sandbucks-percent: 12.0
     research-time-seconds: 54000      # 15 hours
-    gem-cost: 15943230
+    gem-cost: 45000000
 
   # ── Augment XV ─────────────────────────────────────────────
   - tier: 15
@@ -136,7 +136,7 @@ augments:
     gems-percent: 14.0
     sandbucks-percent: 13.0
     research-time-seconds: 64800      # 18 hours
-    gem-cost: 47829690
+    gem-cost: 50000000
 
   # ── Augment XVI ────────────────────────────────────────────
   - tier: 16
@@ -144,7 +144,7 @@ augments:
     gems-percent: 15.0
     sandbucks-percent: 14.0
     research-time-seconds: 72000      # 20 hours
-    gem-cost: 143489070
+    gem-cost: 55000000
 
   # ── Augment XVII ───────────────────────────────────────────
   - tier: 17
@@ -152,7 +152,7 @@ augments:
     gems-percent: 16.0
     sandbucks-percent: 15.0
     research-time-seconds: 79200      # 22 hours
-    gem-cost: 430467210
+    gem-cost: 60000000
 
   # ── Augment XVIII ──────────────────────────────────────────
   - tier: 18
@@ -160,7 +160,7 @@ augments:
     gems-percent: 17.0
     sandbucks-percent: 16.0
     research-time-seconds: 86400      # 24 hours
-    gem-cost: 1291401630
+    gem-cost: 65000000
 
   # ── Augment XIX ────────────────────────────────────────────
   - tier: 19
@@ -168,7 +168,7 @@ augments:
     gems-percent: 18.0
     sandbucks-percent: 17.0
     research-time-seconds: 90000      # 25 hours
-    gem-cost: 3874204890
+    gem-cost: 70000000
 
   # ── Augment XX ─────────────────────────────────────────────
   - tier: 20
@@ -176,7 +176,7 @@ augments:
     gems-percent: 19.0
     sandbucks-percent: 18.0
     research-time-seconds: 93600      # 26 hours
-    gem-cost: 11622614670
+    gem-cost: 75000000
 
 # ============================================================
 # To add more Augments simply copy a block above and increment

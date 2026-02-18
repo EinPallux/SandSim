@@ -30,7 +30,11 @@ public class SandSimPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        this.configManager      = new ConfigManager(this);
+        // IMPORTANT: configs must be loaded before any manager constructor runs,
+        // because every manager reads its config file on construction.
+        this.configManager = new ConfigManager(this);
+        configManager.loadConfigs();
+
         this.dataManager        = new DataManager(this);
         this.messageManager     = new MessageManager(this);
         this.shovelManager      = new ShovelManager(this);
@@ -42,10 +46,7 @@ public class SandSimPlugin extends JavaPlugin {
         this.sandBlockManager   = new SandBlockManager(this);
         this.augmentManager     = new AugmentManager(this);
 
-        // Load configs first
-        configManager.loadConfigs();
-
-        // EventManager must be created AFTER configs are loaded
+        // EventManager must also be after configs
         this.eventManager = new EventManager(this);
 
         dataManager.loadAllData();
