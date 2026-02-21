@@ -25,24 +25,11 @@ import java.util.List;
  *   Row 4  (slots 36–44): filler
  *   Row 5  (slots 45–53): prev(45) | filler | back(49) | filler | next(53)
  *
- * All item materials, names, and lore lines are read from gui.yml under
- * the "augments:" section, so admins can customise every piece of text.
- *
- * Available placeholders in lore lines:
- *   %name%           – display name of the augment (e.g. "Augment III")
- *   %tier%           – numeric tier number
- *   %sand%           – sand % bonus (e.g. "3.0")
- *   %gems%           – gems % bonus
- *   %sandbucks%      – sandbucks % bonus
- *   %cost%           – gem cost to research
- *   %time%           – formatted research time (e.g. "30m")
- *   %remaining%      – formatted time remaining (researching state only)
- *   %unlocked_tier%  – player's currently unlocked tier number
- *   %researching%    – tier currently being researched (0 if none)
+ * All item materials, names, and lore lines are read from augments-gui.yml.
  */
 public class AugmentsGUI extends BaseGUI {
 
-    private static final String SEC = "augments";
+    private static final String SEC = "augments-gui";
 
     // Inner grid slots (rows 1-3, columns 1-7 within each row)
     private static final int[] AUGMENT_SLOTS = {
@@ -62,7 +49,7 @@ public class AugmentsGUI extends BaseGUI {
     }
 
     public AugmentsGUI(SandSimPlugin plugin, int page) {
-        super(plugin, SEC);
+        super(plugin, SEC, plugin.getConfigManager().getAugmentsGuiConfig());
         this.page = page;
     }
 
@@ -74,12 +61,12 @@ public class AugmentsGUI extends BaseGUI {
 
         AugmentManager mgr  = plugin.getAugmentManager();
         PlayerData     data = plugin.getDataManager().getPlayerData(player);
-        FileConfiguration gui = plugin.getConfigManager().getGuiConfig();
+        FileConfiguration gui = plugin.getConfigManager().getAugmentsGuiConfig();
 
         // Tick so all state is current before render
         mgr.tickResearch(data);
 
-        // Fill every slot with gray glass pane
+        // Fill every slot with filler
         Material fillerMat = parseMaterial(gui.getString(SEC + ".filler.material", "GRAY_STAINED_GLASS_PANE"),
                 Material.GRAY_STAINED_GLASS_PANE);
         String   fillerName = gui.getString(SEC + ".filler.name", " ");
@@ -134,7 +121,6 @@ public class AugmentsGUI extends BaseGUI {
 
         AugmentState state = getState(tier, unlockedTier, researchingTier);
 
-        // ── Pick material and lore-key from gui.yml based on state ──────────
         String stateKey = switch (state) {
             case UNLOCKED    -> "unlocked";
             case RESEARCHING -> "researching";
@@ -152,7 +138,6 @@ public class AugmentsGUI extends BaseGUI {
         List<String> loreTpl = gui.getStringList(SEC + ".states." + stateKey + ".lore");
         if (loreTpl.isEmpty()) loreTpl = defaultLore(state);
 
-        // ── Build placeholder map ───────────────────────────────────────────
         long remainingSecs = (state == AugmentState.RESEARCHING)
                 ? mgr.getResearchSecondsRemaining(data) : 0L;
 
@@ -167,14 +152,12 @@ public class AugmentsGUI extends BaseGUI {
         String uTierStr     = String.valueOf(data.getAugmentUnlockedTier());
         String rTierStr     = String.valueOf(data.getAugmentResearchingTier());
 
-        // Apply placeholders to name
         String name = applyPlaceholders(nameTemplate,
                 "%name%", nameStr, "%tier%", tierStr,
                 "%sand%", sandStr, "%gems%", gemsStr, "%sandbucks%", sbStr,
                 "%cost%", costStr, "%time%", timeStr, "%remaining%", remainingStr,
                 "%unlocked_tier%", uTierStr, "%researching%", rTierStr);
 
-        // Apply placeholders to each lore line
         List<String> lore = new ArrayList<>();
         for (String line : loreTpl) {
             lore.add(applyPlaceholders(line,
@@ -224,11 +207,10 @@ public class AugmentsGUI extends BaseGUI {
             return;
         }
 
-        // Check if a named augment slot was clicked
         int slotIndex = getAugmentSlotIndex(slot);
         if (slotIndex < 0) return;
 
-        int tier = page * AUGMENT_SLOTS.length + slotIndex + 1; // 1-based
+        int tier = page * AUGMENT_SLOTS.length + slotIndex + 1;
         AugmentManager mgr  = plugin.getAugmentManager();
         PlayerData     data = plugin.getDataManager().getPlayerData(player);
 
@@ -259,9 +241,7 @@ public class AugmentsGUI extends BaseGUI {
                         "%time%", mgr.formatTime(secs));
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 0.5f);
             }
-            case UNLOCKED -> {
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
-            }
+            case UNLOCKED -> player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
             case LOCKED -> {
                 plugin.getMessageManager().sendMessage(player, "messages.augment-locked");
                 player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
@@ -285,7 +265,7 @@ public class AugmentsGUI extends BaseGUI {
         return AugmentState.LOCKED;
     }
 
-    // ── Hardcoded fallbacks (used when gui.yml keys are missing) ──────────────
+    // ── Hardcoded fallbacks ───────────────────────────────────────────────────
 
     private String defaultMaterial(AugmentState state) {
         return switch (state) {

@@ -1,0 +1,48 @@
+# SandSim Configuration File
+
+# Plugin Settings
+plugin:
+  prefix: "&#CCBD70&lSANDSIM &7➠&r "
+
+# Sand Block Settings
+sand-block:
+  material: SAND
+  cooldown-material: BEDROCK
+  # Red Sand gives 1.5x sand multiplier when broken
+  red-sand-material: RED_SAND
+  red-sand-multiplier: 1.5
+
+# Rebirth Settings
+rebirth:
+  cost: "1000"
+  multiplier-per-rebirth: 0.01  # 0.01 per rebirth = 1.01x multiplier
+
+# Factory Settings
+factory:
+  unlock-cost: "10000"
+  unlock-level: 50   # Minimum player level required to unlock the factory
+
+# ── Protection Settings ──────────────────────────────────────────────────────
+protection:
+  # Prevent players from breaking blocks other than Sand/Red Sand
+  # Bypass permission: sandsim.bypass.blockbreak
+  block-break-protection: true
+
+  # Prevent players from placing blocks
+  # Bypass permission: sandsim.bypass.blockplace
+  block-place-protection: true
+
+  # Prevent players from dropping items
+  # Bypass permission: sandsim.bypass.drop
+  drop-protection: true
+
+  # Prevent players from taking fall damage
+  # Bypass permission: sandsim.bypass.falldamage
+  no-fall-damage: true
+
+  # Prevent players from running /plugins, /version, /about, /ver etc.
+  # Bypass permission: sandsim.bypass.information
+  hide-server-information: true
+
+# Auto-save interval (in ticks, 20 ticks = 1 second)
+auto-save-interval: 12000  # 10 minutes

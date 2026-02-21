@@ -1,0 +1,86 @@
+# ============================================================
+# SandSim — Leaderboard GUI Configuration
+# ============================================================
+# This file controls the visual layout of the Leaderboard GUI
+# (/leaderboard).
+#
+# Available placeholders in entry name / lore:
+#   %rank%   – rank number (1–10)
+#   %player% – player name
+#   %type%   – leaderboard category name
+#   %value%  – the player's value (formatted)
+# ============================================================
+
+leaderboard-gui:
+  title: "SandSim ➠ Leaderboards"
+  size: 54
+
+  filler:
+    enabled: true
+    material: GRAY_STAINED_GLASS_PANE
+    slots: [0,1,2,3,4,5,6,7,8,9,11,13,14,17,18,19,20,21,22,23,24,25,26,27,35,36,40,41,42,43,44,45,46,47,48,50,51,52,53]
+
+  back:
+    slot: 49
+    material: ARROW
+    name: "&c&lBack to Menu"
+    lore:
+      - "&7Return to the main menu"
+
+  # ── Category tab items ────────────────────────────────────────────────────
+  type-sand:
+    slot: 10
+    material: SAND
+    name: "&e&lSand Leaderboard"
+    lore-selected:
+      - "&a➠ Currently viewing"
+    lore-unselected:
+      - "&7Click to view"
+
+  type-gems:
+    slot: 12
+    material: EMERALD
+    name: "&b&lGems Leaderboard"
+    lore-selected:
+      - "&a➠ Currently viewing"
+    lore-unselected:
+      - "&7Click to view"
+
+  type-sandbucks:
+    slot: 14
+    material: GOLD_INGOT
+    name: "&6&lSandbucks Leaderboard"
+    lore-selected:
+      - "&a➠ Currently viewing"
+    lore-unselected:
+      - "&7Click to view"
+
+  type-rebirths:
+    slot: 16
+    material: NETHER_STAR
+    name: "&d&lRebirths Leaderboard"
+    lore-selected:
+      - "&a➠ Currently viewing"
+    lore-unselected:
+      - "&7Click to view"
+
+  # ── Entry slots and materials ─────────────────────────────────────────────
+  # Slots that receive ranked player entries (up to 10 entries).
+  entry-slots: [28,29,30,31,32,33,34,37,38,39]
+
+  entry-material-1:       GOLD_BLOCK    # 1st place
+  entry-material-2:       IRON_BLOCK    # 2nd place
+  entry-material-3:       COPPER_BLOCK  # 3rd place
+  entry-material-default: PLAYER_HEAD   # 4th–10th
+
+  entry:
+    name: "&6#%rank% &7- &f%player%"
+    lore:
+      - "&7%type%: &a%value%"
+
+  placeholder:
+    enabled: false
+    material: GRAY_DYE
+    name: "&7&o???"
+    lore: []
+    slots: [40,41,42,43]

@@ -15,30 +15,33 @@ import java.util.List;
 
 public class UpgradesGUI extends BaseGUI {
 
-    private static final String SEC = "upgrades";
+    private static final String SEC = "upgrades-gui";
 
-    public UpgradesGUI(SandSimPlugin plugin) { super(plugin, SEC); }
+    public UpgradesGUI(SandSimPlugin plugin) {
+        super(plugin, SEC, plugin.getConfigManager().getUpgradesGuiConfig());
+    }
 
     @Override
     protected void setupInventory(Player player) {
         inventory.clear();
+        FileConfiguration cfg = plugin.getConfigManager().getUpgradesGuiConfig();
         PlayerData data = plugin.getDataManager().getPlayerData(player);
-        applyFiller(SEC);
-        inventory.setItem(slotFromConfig(SEC + ".back", 49), itemFromConfig(SEC + ".back"));
+        applyFiller(SEC, cfg);
+        inventory.setItem(slotFromConfig(SEC + ".back", cfg, 49), itemFromConfig(SEC + ".back", cfg));
 
-        buildUpgrade(player, data, "sand-multiplier",       UpgradeType.SAND_MULTIPLIER,       10);
-        buildUpgrade(player, data, "sand-explosion-chance", UpgradeType.SAND_EXPLOSION_CHANCE,  12);
-        buildUpgrade(player, data, "sand-explosion-radius", UpgradeType.SAND_EXPLOSION_RADIUS,  14);
-        buildUpgrade(player, data, "sand-cooldown",         UpgradeType.SAND_COOLDOWN,          16);
-        buildUpgrade(player, data, "gem-chance",            UpgradeType.GEM_CHANCE,             28);
-        buildUpgrade(player, data, "efficiency",            UpgradeType.EFFICIENCY,             31);
-        buildUpgrade(player, data, "gem-multiplier",        UpgradeType.GEM_MULTIPLIER,         34);
+        buildUpgrade(player, data, cfg, "sand-multiplier",       UpgradeType.SAND_MULTIPLIER,       11);
+        buildUpgrade(player, data, cfg, "sand-explosion-chance", UpgradeType.SAND_EXPLOSION_CHANCE,  13);
+        buildUpgrade(player, data, cfg, "sand-explosion-radius", UpgradeType.SAND_EXPLOSION_RADIUS,  14);
+        buildUpgrade(player, data, cfg, "sand-cooldown",         UpgradeType.SAND_COOLDOWN,          12);
+        buildUpgrade(player, data, cfg, "gem-chance",            UpgradeType.GEM_CHANCE,             15);
+        buildUpgrade(player, data, cfg, "efficiency",            UpgradeType.EFFICIENCY,             10);
+        buildUpgrade(player, data, cfg, "gem-multiplier",        UpgradeType.GEM_MULTIPLIER,         16);
 
-        applyPlaceholderItems(SEC);
+        applyPlaceholderItems(SEC, cfg);
     }
 
-    private void buildUpgrade(Player player, PlayerData data, String key, UpgradeType type, int defaultSlot) {
-        FileConfiguration cfg = plugin.getConfigManager().getGuiConfig();
+    private void buildUpgrade(Player player, PlayerData data, FileConfiguration cfg,
+                              String key, UpgradeType type, int defaultSlot) {
         String path = SEC + "." + key;
         int        currentLevel = data.getUpgradeLevel(type);
         int        maxLevel     = plugin.getUpgradeManager().getMaxLevel(type);
@@ -58,7 +61,7 @@ public class UpgradesGUI extends BaseGUI {
                     "%next%",    isMaxed ? "" : formatValue(type, currentLevel + 1),
                     "%cost%",    formatNumber(cost)));
         }
-        inventory.setItem(slotFromConfig(path, defaultSlot), createItem(mat, name, lore));
+        inventory.setItem(slotFromConfig(path, cfg, defaultSlot), createItem(mat, name, lore));
     }
 
     private String formatValue(UpgradeType type, int level) {
@@ -74,9 +77,10 @@ public class UpgradesGUI extends BaseGUI {
     @Override
     public void handleClick(InventoryClickEvent event, Player player) {
         int slot = event.getSlot();
-        if (slot == slotFromConfig(SEC + ".back", 49)) { new MenuGUI(plugin).open(player); return; }
+        FileConfiguration cfg = plugin.getConfigManager().getUpgradesGuiConfig();
+        if (slot == slotFromConfig(SEC + ".back", cfg, 49)) { new MenuGUI(plugin).open(player); return; }
 
-        UpgradeType type = resolveUpgradeType(slot);
+        UpgradeType type = resolveUpgradeType(slot, cfg);
         if (type == null) return;
 
         PlayerData data = plugin.getDataManager().getPlayerData(player);
@@ -91,14 +95,14 @@ public class UpgradesGUI extends BaseGUI {
         }
     }
 
-    private UpgradeType resolveUpgradeType(int slot) {
-        if (slot == slotFromConfig(SEC + ".sand-multiplier",       10)) return UpgradeType.SAND_MULTIPLIER;
-        if (slot == slotFromConfig(SEC + ".sand-explosion-chance", 12)) return UpgradeType.SAND_EXPLOSION_CHANCE;
-        if (slot == slotFromConfig(SEC + ".sand-explosion-radius", 14)) return UpgradeType.SAND_EXPLOSION_RADIUS;
-        if (slot == slotFromConfig(SEC + ".sand-cooldown",         16)) return UpgradeType.SAND_COOLDOWN;
-        if (slot == slotFromConfig(SEC + ".gem-chance",            28)) return UpgradeType.GEM_CHANCE;
-        if (slot == slotFromConfig(SEC + ".efficiency",            31)) return UpgradeType.EFFICIENCY;
-        if (slot == slotFromConfig(SEC + ".gem-multiplier",        34)) return UpgradeType.GEM_MULTIPLIER;
+    private UpgradeType resolveUpgradeType(int slot, FileConfiguration cfg) {
+        if (slot == slotFromConfig(SEC + ".sand-multiplier",       cfg, 11)) return UpgradeType.SAND_MULTIPLIER;
+        if (slot == slotFromConfig(SEC + ".sand-explosion-chance", cfg, 13)) return UpgradeType.SAND_EXPLOSION_CHANCE;
+        if (slot == slotFromConfig(SEC + ".sand-explosion-radius", cfg, 14)) return UpgradeType.SAND_EXPLOSION_RADIUS;
+        if (slot == slotFromConfig(SEC + ".sand-cooldown",         cfg, 12)) return UpgradeType.SAND_COOLDOWN;
+        if (slot == slotFromConfig(SEC + ".gem-chance",            cfg, 15)) return UpgradeType.GEM_CHANCE;
+        if (slot == slotFromConfig(SEC + ".efficiency",            cfg, 10)) return UpgradeType.EFFICIENCY;
+        if (slot == slotFromConfig(SEC + ".gem-multiplier",        cfg, 16)) return UpgradeType.GEM_MULTIPLIER;
         return null;
     }
 }

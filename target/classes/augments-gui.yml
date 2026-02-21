@@ -1,0 +1,112 @@
+# ============================================================
+# SandSim — Augments GUI Configuration
+# ============================================================
+# This file controls ONLY the visual layout of the Augments
+# GUI (/augments). For the actual augment data (bonuses,
+# costs, research times) see augments.yml.
+#
+# Available placeholders in name / lore:
+#   %name%           – display name of the augment (e.g. "Augment III")
+#   %tier%           – numeric tier number
+#   %sand%           – sand % bonus
+#   %gems%           – gems % bonus
+#   %sandbucks%      – sandbucks % bonus
+#   %cost%           – gem cost to research
+#   %time%           – formatted research time (e.g. "30m")
+#   %remaining%      – formatted time remaining (researching state only)
+#   %unlocked_tier%  – player's currently unlocked tier
+#   %researching%    – tier currently being researched (0 if none)
+# ============================================================
+
+augments-gui:
+  title: "SandSim ➠ Augments"
+  size: 54
+
+  # ── Filler item (fills all non-augment, non-nav slots) ───────────────────
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    name: " "
+
+  # ── Navigation buttons ────────────────────────────────────────────────────
+  back:
+    material: BARRIER
+    name: "&c&lBack to Menu"
+    lore:
+      - "&7Return to the main menu"
+
+  prev-page:
+    material: ARROW
+    name: "&c&l← Previous Page"
+    lore:
+      - "&7Go to page %page%"
+
+  next-page:
+    material: ARROW
+    name: "&a&lNext Page →"
+    lore:
+      - "&7Go to page %page%"
+
+  # ── Augment item appearance per state ────────────────────────────────────
+  states:
+
+    unlocked:
+      material: GREEN_STAINED_GLASS_PANE
+      name: "&a&l%name%"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ ᴍᴇɴᴜ"
+        - ""
+        - "&7Bonuses &8(active, replaces previous)&7:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&a✔ &aResearched & Active"
+
+    researching:
+      material: YELLOW_STAINED_GLASS_PANE
+      name: "&e&l%name% &7(Researching)"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ ᴍᴇɴᴜ"
+        - ""
+        - "&7Bonuses on completion:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&e⏳ Researching..."
+        - "&7Time remaining: &e%remaining%"
+        - ""
+        - "&7Click to see progress."
+
+    available:
+      material: YELLOW_STAINED_GLASS_PANE
+      name: "&e&l%name% &7(Available)"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ ᴍᴇɴᴜ"
+        - ""
+        - "&7Bonuses on unlock:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&7Research Cost: &b%cost% Gems"
+        - "&7Research Time: &e%time%"
+        - ""
+        - "&aClick to start research!"
+
+    locked:
+      material: RED_STAINED_GLASS_PANE
+      name: "&c&l%name% &7(Locked)"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ ᴍᴇɴᴜ"
+        - ""
+        - "&7Bonuses on unlock:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&7Research Cost: &b%cost% Gems"
+        - "&7Research Time: &e%time%"
+        - ""
+        - "&c✖ Locked"
+        - "&7Research the previous Augment first."

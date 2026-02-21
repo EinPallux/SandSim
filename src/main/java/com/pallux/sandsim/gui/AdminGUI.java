@@ -12,43 +12,47 @@ import java.util.List;
 
 public class AdminGUI extends BaseGUI {
 
-    private static final String SEC = "admin";
+    private static final String SEC = "admin-gui";
 
-    public AdminGUI(SandSimPlugin plugin) { super(plugin, SEC); }
+    public AdminGUI(SandSimPlugin plugin) {
+        super(plugin, SEC, plugin.getConfigManager().getAdminGuiConfig());
+    }
 
     @Override
     protected void setupInventory(Player player) {
         inventory.clear();
-        FileConfiguration cfg = plugin.getConfigManager().getGuiConfig();
-        applyFiller(SEC);
-        inventory.setItem(slotFromConfig(SEC + ".reload",   11), itemFromConfig(SEC + ".reload"));
-        inventory.setItem(slotFromConfig(SEC + ".commands", 13), itemFromConfig(SEC + ".commands"));
+        FileConfiguration cfg = plugin.getConfigManager().getAdminGuiConfig();
+        applyFiller(SEC, cfg);
+        inventory.setItem(slotFromConfig(SEC + ".reload",   cfg, 11), itemFromConfig(SEC + ".reload",   cfg));
+        inventory.setItem(slotFromConfig(SEC + ".commands", cfg, 13), itemFromConfig(SEC + ".commands", cfg));
 
         String version = plugin.getDescription().getVersion();
         String author  = String.join(", ", plugin.getDescription().getAuthors());
         List<String> rawLore = cfg.getStringList(SEC + ".info.lore");
         List<String> infoLore = new ArrayList<>();
-        for (String line : rawLore) infoLore.add(applyPlaceholders(line, "%version%", version, "%author%", author));
+        for (String line : rawLore)
+            infoLore.add(applyPlaceholders(line, "%version%", version, "%author%", author));
 
-        inventory.setItem(slotFromConfig(SEC + ".info", 15),
+        inventory.setItem(slotFromConfig(SEC + ".info", cfg, 15),
                 createItem(parseMaterial(cfg.getString(SEC + ".info.material", "BOOK"), org.bukkit.Material.BOOK),
                         cfg.getString(SEC + ".info.name", "&a&lPlugin Info"), infoLore));
 
-        applyPlaceholderItems(SEC);
+        applyPlaceholderItems(SEC, cfg);
     }
 
     @Override
     public void handleClick(InventoryClickEvent event, Player player) {
         int slot = event.getSlot();
-        if (slot == slotFromConfig(SEC + ".reload", 11)) {
+        FileConfiguration cfg = plugin.getConfigManager().getAdminGuiConfig();
+        if (slot == slotFromConfig(SEC + ".reload", cfg, 11)) {
             player.closeInventory();
             plugin.reload();
             plugin.getMessageManager().sendMessage(player, "messages.reload-success");
             player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
-        } else if (slot == slotFromConfig(SEC + ".commands", 13)) {
+        } else if (slot == slotFromConfig(SEC + ".commands", cfg, 13)) {
             player.closeInventory();
             sendHelpMessage(player);
-        } else if (slot == slotFromConfig(SEC + ".info", 15)) {
+        } else if (slot == slotFromConfig(SEC + ".info", cfg, 15)) {
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
         }
     }

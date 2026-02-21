@@ -15,18 +15,20 @@ import java.util.List;
 
 public class FactoryGUI extends BaseGUI {
 
-    private static final String SEC = "factory";
+    private static final String SEC = "factory-gui";
 
-    public FactoryGUI(SandSimPlugin plugin) { super(plugin, SEC); }
+    public FactoryGUI(SandSimPlugin plugin) {
+        super(plugin, SEC, plugin.getConfigManager().getFactoryGuiConfig());
+    }
 
     @Override
     protected void setupInventory(Player player) {
         inventory.clear();
-        FileConfiguration cfg = plugin.getConfigManager().getGuiConfig();
+        FileConfiguration cfg = plugin.getConfigManager().getFactoryGuiConfig();
         PlayerData data = plugin.getDataManager().getPlayerData(player);
 
-        applyFiller(SEC);
-        inventory.setItem(slotFromConfig(SEC + ".back", 49), itemFromConfig(SEC + ".back"));
+        applyFiller(SEC, cfg);
+        inventory.setItem(slotFromConfig(SEC + ".back", cfg, 49), itemFromConfig(SEC + ".back", cfg));
 
         if (!data.isFactoryUnlocked()) {
             buildUnlockItem(player, data, cfg);
@@ -35,7 +37,7 @@ public class FactoryGUI extends BaseGUI {
             buildFactoryUpgrade(player, data, "production-speed",  UpgradeType.FACTORY_PRODUCTION_SPEED,  29);
             buildFactoryUpgrade(player, data, "production-amount", UpgradeType.FACTORY_PRODUCTION_AMOUNT, 33);
         }
-        applyPlaceholderItems(SEC);
+        applyPlaceholderItems(SEC, cfg);
     }
 
     private void buildUnlockItem(Player player, PlayerData data, FileConfiguration cfg) {
@@ -44,12 +46,10 @@ public class FactoryGUI extends BaseGUI {
         int    reqLevel  = plugin.getFactoryManager().getFactoryUnlockLevel();
         boolean meetsLevel = plugin.getFactoryManager().meetsLevelRequirement(data);
         boolean canAfford  = data.getSand().compareTo(plugin.getFactoryManager().getFactoryUnlockCost()) >= 0;
-        boolean canUnlock  = meetsLevel && canAfford;
 
         Material mat  = parseMaterial(cfg.getString(path + ".material", "BARRIER"), Material.BARRIER);
         String   name = cfg.getString(path + ".name", "&c&lFactory Locked");
 
-        // Pick the most specific lore key available, falling back gracefully.
         String lorePath;
         if (!meetsLevel) {
             lorePath = path + ".lore-no-level";
@@ -59,8 +59,6 @@ public class FactoryGUI extends BaseGUI {
             lorePath = path + ".lore";
         }
 
-        // If the specific key has no entries, fall back to the base lore key so
-        // the GUI never shows an empty item.
         List<String> rawLore = cfg.getStringList(lorePath);
         if (rawLore.isEmpty()) rawLore = cfg.getStringList(path + ".lore");
 
@@ -71,7 +69,7 @@ public class FactoryGUI extends BaseGUI {
                     "%req_level%", String.valueOf(reqLevel),
                     "%level%",     String.valueOf(data.getLevel())));
         }
-        inventory.setItem(slotFromConfig(path, 13), createItem(mat, name, lore));
+        inventory.setItem(slotFromConfig(path, cfg, 13), createItem(mat, name, lore));
     }
 
     private void buildCoreItem(PlayerData data, FileConfiguration cfg) {
@@ -88,11 +86,11 @@ public class FactoryGUI extends BaseGUI {
                     "%amount%", String.format("%.0f", amount),
                     "%time%",   String.format("%.1f", timeMs / 1000.0)));
         }
-        inventory.setItem(slotFromConfig(path, 13), createItem(mat, name, lore));
+        inventory.setItem(slotFromConfig(path, cfg, 13), createItem(mat, name, lore));
     }
 
     private void buildFactoryUpgrade(Player player, PlayerData data, String key, UpgradeType type, int defaultSlot) {
-        FileConfiguration cfg = plugin.getConfigManager().getGuiConfig();
+        FileConfiguration cfg = plugin.getConfigManager().getFactoryGuiConfig();
         String path        = SEC + "." + key;
         int        currentLevel = data.getUpgradeLevel(type);
         int        maxLevel     = plugin.getUpgradeManager().getMaxLevel(type);
@@ -114,7 +112,7 @@ public class FactoryGUI extends BaseGUI {
                     "%next%",    isMaxed ? "" : formatUpgradeValue(nextValue),
                     "%cost%",    formatNumber(cost)));
         }
-        inventory.setItem(slotFromConfig(path, defaultSlot), createItem(mat, name, lore));
+        inventory.setItem(slotFromConfig(path, cfg, defaultSlot), createItem(mat, name, lore));
     }
 
     private String formatUpgradeValue(double val) {
@@ -125,13 +123,13 @@ public class FactoryGUI extends BaseGUI {
     @Override
     public void handleClick(InventoryClickEvent event, Player player) {
         int slot = event.getSlot();
+        FileConfiguration cfg = plugin.getConfigManager().getFactoryGuiConfig();
         PlayerData data = plugin.getDataManager().getPlayerData(player);
 
-        if (slot == slotFromConfig(SEC + ".back", 49)) { new MenuGUI(plugin).open(player); return; }
+        if (slot == slotFromConfig(SEC + ".back", cfg, 49)) { new MenuGUI(plugin).open(player); return; }
 
-        int unlockSlot = slotFromConfig(SEC + ".unlock", 4);
+        int unlockSlot = slotFromConfig(SEC + ".unlock", cfg, 4);
         if (slot == unlockSlot && !data.isFactoryUnlocked()) {
-            // Level check first — gives a clearer message if the player can't unlock yet.
             if (!plugin.getFactoryManager().meetsLevelRequirement(data)) {
                 player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                 plugin.getMessageManager().sendMessage(player, "messages.factory-level-required",
@@ -152,8 +150,8 @@ public class FactoryGUI extends BaseGUI {
         if (!data.isFactoryUnlocked()) return;
 
         UpgradeType type = null;
-        if      (slot == slotFromConfig(SEC + ".production-speed",  29)) type = UpgradeType.FACTORY_PRODUCTION_SPEED;
-        else if (slot == slotFromConfig(SEC + ".production-amount", 33)) type = UpgradeType.FACTORY_PRODUCTION_AMOUNT;
+        if      (slot == slotFromConfig(SEC + ".production-speed",  cfg, 29)) type = UpgradeType.FACTORY_PRODUCTION_SPEED;
+        else if (slot == slotFromConfig(SEC + ".production-amount", cfg, 33)) type = UpgradeType.FACTORY_PRODUCTION_AMOUNT;
         if (type == null) return;
 
         if (plugin.getFactoryManager().purchaseFactoryUpgrade(data, type)) {

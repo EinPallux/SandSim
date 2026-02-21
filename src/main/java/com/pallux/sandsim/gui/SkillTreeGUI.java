@@ -25,28 +25,19 @@ import java.util.List;
  * Row 3: filler | filler | SAND_SKILL_3      | filler | GEM_SKILL_3      | filler | SB_SKILL_3      | filler | filler
  * Row 4: filler | filler | SAND_SKILL_4      | filler | GEM_SKILL_4      | filler | SB_SKILL_4      | filler | filler
  * Row 5: BACK(45) | filler … filler | INFO(49) | filler … filler
- *
- * Column mapping:
- *   Col 2 (slots 2,11,20,29,38) → Sand track
- *   Col 4 (slots 4,13,22,31,40) → Gems track
- *   Col 6 (slots 6,15,24,33,42) → Sandbucks track
  */
 public class SkillTreeGUI extends BaseGUI {
 
-    private static final String SEC = "skilltree";
+    private static final String SEC = "skilltree-gui";
 
     // ── Header slots (row 0) ──────────────────────────────────────────────────
     private static final int SLOT_SAND_HEADER = 2;
     private static final int SLOT_GEM_HEADER  = 4;
     private static final int SLOT_SB_HEADER   = 6;
 
-    // ── Skill slots: sand track (col 2, rows 1-4) ─────────────────────────────
+    // ── Skill slots ───────────────────────────────────────────────────────────
     private static final int[] SAND_SLOTS = { 11, 20, 29, 38 };
-
-    // ── Skill slots: gems track (col 4, rows 1-4) ─────────────────────────────
     private static final int[] GEM_SLOTS  = { 13, 22, 31, 40 };
-
-    // ── Skill slots: sandbucks track (col 6, rows 1-4) ───────────────────────
     private static final int[] SB_SLOTS   = { 15, 24, 33, 42 };
 
     // ── Navigation slots (row 5) ──────────────────────────────────────────────
@@ -54,7 +45,7 @@ public class SkillTreeGUI extends BaseGUI {
     private static final int SLOT_INFO = 49;
 
     public SkillTreeGUI(SandSimPlugin plugin) {
-        super(plugin, SEC);
+        super(plugin, SEC, plugin.getConfigManager().getSkillTreeGuiConfig());
     }
 
     // ── Setup ─────────────────────────────────────────────────────────────────
@@ -62,11 +53,10 @@ public class SkillTreeGUI extends BaseGUI {
     @Override
     protected void setupInventory(Player player) {
         inventory.clear();
-        FileConfiguration cfg = plugin.getConfigManager().getSkillsConfig();
+        FileConfiguration cfg = plugin.getConfigManager().getSkillTreeGuiConfig();
         PlayerData data = plugin.getDataManager().getPlayerData(player);
         SkillManager mgr = plugin.getSkillManager();
 
-        // Sync skill points in case level changed
         mgr.syncSkillPoints(data);
 
         // ── Filler ────────────────────────────────────────────────────────────
@@ -102,8 +92,8 @@ public class SkillTreeGUI extends BaseGUI {
         }
 
         // ── Back button ───────────────────────────────────────────────────────
-        Material backMat   = parseMaterial(cfg.getString(SEC + ".back.material", "ARROW"), Material.ARROW);
-        String   backName  = cfg.getString(SEC + ".back.name", "&c&lBack to Menu");
+        Material backMat  = parseMaterial(cfg.getString(SEC + ".back.material", "ARROW"), Material.ARROW);
+        String   backName = cfg.getString(SEC + ".back.name", "&c&lBack to Menu");
         List<String> backLore = cfg.getStringList(SEC + ".back.lore");
         inventory.setItem(SLOT_BACK, createItem(backMat, backName, backLore.isEmpty() ? null : backLore));
 
@@ -120,7 +110,6 @@ public class SkillTreeGUI extends BaseGUI {
                 Material.WHITE_STAINED_GLASS_PANE);
         String   name = cfg.getString(path + ".name", "&f&l" + key);
 
-        // Build lore with track-specific overall multiplier placeholders
         List<String> rawLore = cfg.getStringList(path + ".lore");
         List<String> lore = new ArrayList<>();
         double sandMult  = mgr.getSandMultiplier(data);
@@ -148,25 +137,21 @@ public class SkillTreeGUI extends BaseGUI {
         boolean prereqMet = mgr.hasPrerequisite(data, skill);
         boolean canAfford = data.getAvailableSkillPoints() >= mgr.getSkillCost(skill);
 
-        // State: owned → purchased; prereqMet && canAfford → available; prereqMet && !canAfford → no-points; else → locked
         String state;
-        if (owned)                         state = "purchased";
-        else if (!prereqMet)               state = "locked";
-        else if (canAfford)                state = "available";
-        else                               state = "no-points";
+        if (owned)          state = "purchased";
+        else if (!prereqMet) state = "locked";
+        else if (canAfford)  state = "available";
+        else                 state = "no-points";
 
         String track = skill.getTrack();
         int    tier  = skill.getTier();
         String pathBase = SEC + ".skill-states." + state;
 
-        // Material: state-specific, defaulting sensibly
         Material mat = parseMaterial(cfg.getString(pathBase + ".material", defaultMaterial(state)),
                 Material.valueOf(defaultMaterial(state)));
 
-        // Name template
         String nameTemplate = cfg.getString(pathBase + ".name", defaultName(state, track, tier));
 
-        // Bonus display
         String bonusStr = getBonusDisplay(mgr, skill);
         String costStr  = String.valueOf(mgr.getSkillCost(skill));
         String tierStr  = String.valueOf(tier);
@@ -176,7 +161,6 @@ public class SkillTreeGUI extends BaseGUI {
                 "%track%", trackDisplay, "%tier%", tierStr,
                 "%bonus%", bonusStr, "%cost%", costStr);
 
-        // Lore template
         List<String> loreTpl = cfg.getStringList(pathBase + ".lore");
         if (loreTpl.isEmpty()) loreTpl = defaultLore(state, track, tier, bonusStr, costStr);
 
@@ -233,7 +217,6 @@ public class SkillTreeGUI extends BaseGUI {
             return;
         }
 
-        // Resolve which skill was clicked (if any)
         SkillType skill = resolveSkill(slot);
         if (skill == null) return;
 
@@ -242,7 +225,6 @@ public class SkillTreeGUI extends BaseGUI {
         mgr.syncSkillPoints(data);
 
         if (data.hasSkill(skill)) {
-            // Already purchased — play subtle click
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
             return;
         }
@@ -260,13 +242,12 @@ public class SkillTreeGUI extends BaseGUI {
             return;
         }
 
-        // Purchased successfully
         plugin.getMessageManager().sendMessage(player, "messages.skill-purchased",
                 "%skill%", capitalize(skill.getTrack()) + " Skill " + skill.getTier(),
                 "%points%", String.valueOf(data.getAvailableSkillPoints()));
         player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.1f);
         plugin.getDataManager().savePlayerData(player);
-        setupInventory(player); // refresh
+        setupInventory(player);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -304,14 +285,14 @@ public class SkillTreeGUI extends BaseGUI {
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
-    // ── Default fallback content ──────────────────────────────────────────────
+    // ── Default fallback content (used when config keys are missing) ──────────
 
     private String defaultMaterial(String state) {
         return switch (state) {
             case "purchased" -> "GREEN_STAINED_GLASS_PANE";
             case "available" -> "YELLOW_STAINED_GLASS_PANE";
             case "no-points" -> "ORANGE_STAINED_GLASS_PANE";
-            default          -> "RED_STAINED_GLASS_PANE";   // locked
+            default          -> "RED_STAINED_GLASS_PANE";
         };
     }
 

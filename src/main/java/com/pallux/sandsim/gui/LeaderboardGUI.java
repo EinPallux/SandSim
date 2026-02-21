@@ -15,29 +15,31 @@ import java.util.List;
 
 public class LeaderboardGUI extends BaseGUI {
 
-    private static final String SEC = "leaderboard";
+    private static final String SEC = "leaderboard-gui";
     private LeaderboardType currentType;
 
-    public LeaderboardGUI(SandSimPlugin plugin) { this(plugin, LeaderboardType.SAND); }
+    public LeaderboardGUI(SandSimPlugin plugin) {
+        this(plugin, LeaderboardType.SAND);
+    }
 
     public LeaderboardGUI(SandSimPlugin plugin, LeaderboardType type) {
-        super(plugin, SEC);
+        super(plugin, SEC, plugin.getConfigManager().getLeaderboardGuiConfig());
         this.currentType = type;
     }
 
     @Override
     protected void setupInventory(Player player) {
         inventory.clear();
-        applyFiller(SEC);
-        inventory.setItem(slotFromConfig(SEC + ".back", 49), itemFromConfig(SEC + ".back"));
+        FileConfiguration cfg = plugin.getConfigManager().getLeaderboardGuiConfig();
+        applyFiller(SEC, cfg);
+        inventory.setItem(slotFromConfig(SEC + ".back", cfg, 49), itemFromConfig(SEC + ".back", cfg));
 
-        FileConfiguration cfg = plugin.getConfigManager().getGuiConfig();
         buildTab(cfg, "type-sand",      10, LeaderboardType.SAND);
         buildTab(cfg, "type-gems",      12, LeaderboardType.GEMS);
         buildTab(cfg, "type-sandbucks", 14, LeaderboardType.SANDBUCKS);
         buildTab(cfg, "type-rebirths",  16, LeaderboardType.REBIRTHS);
         buildEntries(cfg);
-        applyPlaceholderItems(SEC);
+        applyPlaceholderItems(SEC, cfg);
     }
 
     private void buildTab(FileConfiguration cfg, String key, int defaultSlot, LeaderboardType type) {
@@ -46,7 +48,7 @@ public class LeaderboardGUI extends BaseGUI {
         String   name = cfg.getString(path + ".name", key);
         boolean selected = currentType == type;
         List<String> lore = cfg.getStringList(selected ? path + ".lore-selected" : path + ".lore-unselected");
-        inventory.setItem(slotFromConfig(path, defaultSlot), createItem(mat, name, lore));
+        inventory.setItem(slotFromConfig(path, cfg, defaultSlot), createItem(mat, name, lore));
     }
 
     private void buildEntries(FileConfiguration cfg) {
@@ -64,23 +66,28 @@ public class LeaderboardGUI extends BaseGUI {
                 List<String> emptyLore = new ArrayList<>();
                 emptyLore.add("&8No player yet");
                 inventory.setItem(slot, createItem(Material.GRAY_STAINED_GLASS_PANE,
-                        applyPlaceholders(entryName, "%rank%", String.valueOf(i + 1), "%player%", "???"), emptyLore));
+                        applyPlaceholders(entryName,
+                                "%rank%", String.valueOf(i + 1), "%player%", "???"),
+                        emptyLore));
                 continue;
             }
 
             LeaderboardEntry entry = entries.get(i);
             int rank = i + 1;
             Material mat = switch (rank) {
-                case 1  -> parseMaterial(cfg.getString(SEC + ".entry-material-1", "GOLD_BLOCK"),   Material.GOLD_BLOCK);
-                case 2  -> parseMaterial(cfg.getString(SEC + ".entry-material-2", "IRON_BLOCK"),   Material.IRON_BLOCK);
-                case 3  -> parseMaterial(cfg.getString(SEC + ".entry-material-3", "COPPER_BLOCK"), Material.COPPER_BLOCK);
-                default -> parseMaterial(cfg.getString(SEC + ".entry-material-default", "PLAYER_HEAD"), Material.PLAYER_HEAD);
+                case 1  -> parseMaterial(cfg.getString(SEC + ".entry-material-1",       "GOLD_BLOCK"),   Material.GOLD_BLOCK);
+                case 2  -> parseMaterial(cfg.getString(SEC + ".entry-material-2",       "IRON_BLOCK"),   Material.IRON_BLOCK);
+                case 3  -> parseMaterial(cfg.getString(SEC + ".entry-material-3",       "COPPER_BLOCK"), Material.COPPER_BLOCK);
+                default -> parseMaterial(cfg.getString(SEC + ".entry-material-default", "PLAYER_HEAD"),  Material.PLAYER_HEAD);
             };
 
-            String name = applyPlaceholders(entryName, "%rank%", String.valueOf(rank), "%player%", entry.getPlayerName());
+            String name = applyPlaceholders(entryName,
+                    "%rank%", String.valueOf(rank), "%player%", entry.getPlayerName());
             List<String> lore = new ArrayList<>();
             for (String line : entryLoreTpl) {
-                lore.add(applyPlaceholders(line, "%type%", typeLabel, "%value%", formatNumber(entry.getValue()), "%rank%", String.valueOf(rank), "%player%", entry.getPlayerName()));
+                lore.add(applyPlaceholders(line,
+                        "%type%", typeLabel, "%value%", formatNumber(entry.getValue()),
+                        "%rank%", String.valueOf(rank), "%player%", entry.getPlayerName()));
             }
             inventory.setItem(slot, createItem(mat, name, lore));
         }
@@ -89,12 +96,13 @@ public class LeaderboardGUI extends BaseGUI {
     @Override
     public void handleClick(InventoryClickEvent event, Player player) {
         int slot = event.getSlot();
+        FileConfiguration cfg = plugin.getConfigManager().getLeaderboardGuiConfig();
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
 
-        if      (slot == slotFromConfig(SEC + ".back",           49)) { new MenuGUI(plugin).open(player); }
-        else if (slot == slotFromConfig(SEC + ".type-sand",      10)) { currentType = LeaderboardType.SAND;      setupInventory(player); }
-        else if (slot == slotFromConfig(SEC + ".type-gems",      12)) { currentType = LeaderboardType.GEMS;      setupInventory(player); }
-        else if (slot == slotFromConfig(SEC + ".type-sandbucks", 14)) { currentType = LeaderboardType.SANDBUCKS; setupInventory(player); }
-        else if (slot == slotFromConfig(SEC + ".type-rebirths",  16)) { currentType = LeaderboardType.REBIRTHS;  setupInventory(player); }
+        if      (slot == slotFromConfig(SEC + ".back",           cfg, 49)) { new MenuGUI(plugin).open(player); }
+        else if (slot == slotFromConfig(SEC + ".type-sand",      cfg, 10)) { currentType = LeaderboardType.SAND;      setupInventory(player); }
+        else if (slot == slotFromConfig(SEC + ".type-gems",      cfg, 12)) { currentType = LeaderboardType.GEMS;      setupInventory(player); }
+        else if (slot == slotFromConfig(SEC + ".type-sandbucks", cfg, 14)) { currentType = LeaderboardType.SANDBUCKS; setupInventory(player); }
+        else if (slot == slotFromConfig(SEC + ".type-rebirths",  cfg, 16)) { currentType = LeaderboardType.REBIRTHS;  setupInventory(player); }
     }
 }

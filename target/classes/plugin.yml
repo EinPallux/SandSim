@@ -1,0 +1,89 @@
+name: SandSim
+version: '1.0.0'
+main: com.pallux.sandsim.SandSimPlugin
+api-version: '1.21'
+description: A Sand Farming Simulator plugin for Paper servers
+author: Pallux
+website: https://pallux.com
+softdepend: [PlaceholderAPI]
+
+commands:
+  menu:
+    description: Opens the main menu
+    usage: /menu
+    permission: sandsim.player
+  rebirth:
+    description: Perform a rebirth
+    usage: /rebirth
+    permission: sandsim.player
+  factory:
+    description: Opens the factory menu
+    usage: /factory
+    permission: sandsim.player
+  upgrades:
+    description: Opens the upgrades menu
+    usage: /upgrades
+    permission: sandsim.player
+  augments:
+    description: Opens the augments menu
+    usage: /augments
+    permission: sandsim.player
+  skills:
+    description: Opens the Skill Tree menu
+    usage: /skills
+    permission: sandsim.player
+    aliases: [skilltree, skill]
+  sandbucks:
+    description: Check your sandbucks balance
+    usage: /sandbucks
+    permission: sandsim.player
+  sand:
+    description: Check your sand balance
+    usage: /sand
+    permission: sandsim.player
+  gems:
+    description: Check your gems balance
+    usage: /gems
+    permission: sandsim.player
+  rebirths:
+    description: Check your rebirths count
+    usage: /rebirths
+    permission: sandsim.player
+  multiplier:
+    description: Check your multiplier
+    usage: /multiplier
+    permission: sandsim.player
+  leaderboard:
+    description: Opens the leaderboard
+    usage: /leaderboard [type]
+    permission: sandsim.player
+    aliases: [lb, top]
+  sandsim:
+    description: Main admin command
+    usage: /sandsim help
+    permission: sandsim.admin
+
+permissions:
+  sandsim.player:
+    description: Allows access to all player commands
+    default: true
+  sandsim.admin:
+    description: Allows access to all admin commands
+    default: op
+    children:
+      sandsim.player: true
+  sandsim.bypass.blockbreak:
+    description: Bypass block-break protection (can break any block)
+    default: op
+  sandsim.bypass.blockplace:
+    description: Bypass block-place protection (can place any block)
+    default: op
+  sandsim.bypass.drop:
+    description: Bypass item drop protection (can drop any item)
+    default: op
+  sandsim.bypass.falldamage:
+    description: Bypass fall damage cancellation (takes normal fall damage)
+    default: op
+  sandsim.bypass.information:
+    description: Bypass server information hiding (can use /plugins, /version etc.)
+    default: op

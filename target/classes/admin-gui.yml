@@ -1,0 +1,59 @@
+# ============================================================
+# SandSim — Admin GUI Configuration
+# ============================================================
+# This file controls the visual layout of the Admin GUI
+# (/sandsim admin).
+#
+# Available placeholders in the info item lore:
+#   %version% – plugin version
+#   %author%  – plugin author(s)
+# ============================================================
+
+admin-gui:
+  title: "SandSim ➠ Admin Dashboard"
+  size: 27
+
+  filler:
+    enabled: true
+    material: RED_STAINED_GLASS_PANE
+    slots: [0,1,2,3,4,5,6,7,8,9,17,18,19,20,21,22,23,24,25,26]
+
+  reload:
+    slot: 11
+    material: PAPER
+    name: "&e&lReload Config"
+    lore:
+      - "&8ᴀᴅᴍɪɴ ᴍᴇɴᴜ"
+      - ""
+      - "&7Reload all plugin configuration files."
+      - ""
+      - "&eClick to reload!"
+
+  commands:
+    slot: 13
+    material: COMMAND_BLOCK
+    name: "&b&lAdmin Commands"
+    lore:
+      - "&8ᴀᴅᴍɪɴ ᴍᴇɴᴜ"
+      - ""
+      - "&7View all available admin commands"
+      - "&7in chat."
+      - ""
+      - "&eClick to view!"
+
+  info:
+    slot: 15
+    material: BOOK
+    name: "&a&lPlugin Info"
+    lore:
+      - "&8ᴀᴅᴍɪɴ ᴍᴇɴᴜ"
+      - ""
+      - "&7Version: &e%version%"
+      - "&7Author: &e%author%"
+
+  placeholder:
+    enabled: false
+    material: GRAY_DYE
+    name: "&7&o???"
+    lore: []
+    slots: [10,12,14,16]

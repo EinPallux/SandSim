@@ -22,12 +22,26 @@ public abstract class BaseGUI implements InventoryHolder {
     protected final SandSimPlugin plugin;
     protected final Inventory inventory;
 
-    public BaseGUI(SandSimPlugin plugin, String configSection) {
+    /**
+     * Primary constructor — GUI reads its title and size from the supplied
+     * {@code config} file under the given {@code configSection} key.
+     *
+     * Each GUI class should pass its own dedicated config file here, e.g.
+     * {@code plugin.getConfigManager().getUpgradesGuiConfig()}.
+     */
+    public BaseGUI(SandSimPlugin plugin, String configSection, FileConfiguration config) {
         this.plugin = plugin;
-        FileConfiguration cfg = plugin.getConfigManager().getGuiConfig();
-        String title = cfg.getString(configSection + ".title", "GUI");
-        int    size  = cfg.getInt(configSection + ".size", 54);
+        String title = config.getString(configSection + ".title", "GUI");
+        int    size  = config.getInt(configSection + ".size", 54);
         this.inventory = Bukkit.createInventory(this, size, ColorUtils.toComponent(title));
+    }
+
+    /**
+     * Legacy / convenience constructor that reads from the main gui.yml.
+     * Used only by {@link MenuGUI} (the Dashboard).
+     */
+    public BaseGUI(SandSimPlugin plugin, String configSection) {
+        this(plugin, configSection, plugin.getConfigManager().getGuiConfig());
     }
 
     @Override
@@ -41,15 +55,30 @@ public abstract class BaseGUI implements InventoryHolder {
     protected abstract void setupInventory(Player player);
     public    abstract void handleClick(InventoryClickEvent event, Player player);
 
+    // ── Filler helper ─────────────────────────────────────────────────────────
+
+    /**
+     * Reads filler configuration from whichever config file the subclass uses.
+     * Subclasses should call {@link #applyFiller(String, FileConfiguration)}
+     * with their own config; this overload falls back to gui.yml for backwards
+     * compatibility with MenuGUI.
+     */
     protected void applyFiller(String configSection) {
-        FileConfiguration cfg = plugin.getConfigManager().getGuiConfig();
+        applyFiller(configSection, plugin.getConfigManager().getGuiConfig());
+    }
+
+    protected void applyFiller(String configSection, FileConfiguration cfg) {
         if (!cfg.getBoolean(configSection + ".filler.enabled", false)) return;
-        Material mat = parseMaterial(cfg.getString(configSection + ".filler.material", "GRAY_STAINED_GLASS_PANE"), Material.GRAY_STAINED_GLASS_PANE);
+        Material mat = parseMaterial(
+                cfg.getString(configSection + ".filler.material", "GRAY_STAINED_GLASS_PANE"),
+                Material.GRAY_STAINED_GLASS_PANE);
         ItemStack filler = createItem(mat, " ");
         for (int slot : cfg.getIntegerList(configSection + ".filler.slots")) {
             if (slot >= 0 && slot < inventory.getSize()) inventory.setItem(slot, filler);
         }
     }
+
+    // ── Item creation helpers ─────────────────────────────────────────────────
 
     protected ItemStack createItem(Material material, String name, List<String> lore) {
         ItemStack item = new ItemStack(material);
@@ -70,8 +99,15 @@ public abstract class BaseGUI implements InventoryHolder {
         return createItem(material, name, null);
     }
 
+    /**
+     * Builds an ItemStack from a config path using the main gui.yml.
+     * Used only by MenuGUI; other GUIs read their own config directly.
+     */
     protected ItemStack itemFromConfig(String path, String... placeholders) {
-        FileConfiguration cfg = plugin.getConfigManager().getGuiConfig();
+        return itemFromConfig(path, plugin.getConfigManager().getGuiConfig(), placeholders);
+    }
+
+    protected ItemStack itemFromConfig(String path, FileConfiguration cfg, String... placeholders) {
         Material mat  = parseMaterial(cfg.getString(path + ".material", "STONE"), Material.STONE);
         String   name = applyPlaceholders(cfg.getString(path + ".name", ""), placeholders);
         List<String> rawLore = cfg.getStringList(path + ".lore");
@@ -80,8 +116,15 @@ public abstract class BaseGUI implements InventoryHolder {
         return createItem(mat, name, lore);
     }
 
+    // ── Config reading helpers ────────────────────────────────────────────────
+
+    /** Reads a slot number from the main gui.yml (used by MenuGUI). */
     protected int slotFromConfig(String path, int fallback) {
-        return plugin.getConfigManager().getGuiConfig().getInt(path + ".slot", fallback);
+        return slotFromConfig(path, plugin.getConfigManager().getGuiConfig(), fallback);
+    }
+
+    protected int slotFromConfig(String path, FileConfiguration cfg, int fallback) {
+        return cfg.getInt(path + ".slot", fallback);
     }
 
     protected Material parseMaterial(String name, Material fallback) {
@@ -114,8 +157,12 @@ public abstract class BaseGUI implements InventoryHolder {
         return NumberFormatter.format(number);
     }
 
+    /** Reads placeholder item config from the main gui.yml (used by MenuGUI). */
     protected void applyPlaceholderItems(String configSection) {
-        FileConfiguration cfg = plugin.getConfigManager().getGuiConfig();
+        applyPlaceholderItems(configSection, plugin.getConfigManager().getGuiConfig());
+    }
+
+    protected void applyPlaceholderItems(String configSection, FileConfiguration cfg) {
         String path = configSection + ".placeholder";
         if (!cfg.getBoolean(path + ".enabled", false)) return;
         Material mat  = parseMaterial(cfg.getString(path + ".material", "GRAY_DYE"), Material.GRAY_DYE);
