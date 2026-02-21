@@ -44,10 +44,6 @@ public class FactoryManager {
         return true;
     }
 
-    /**
-     * Called every second. Only processes online players so offline players
-     * never accumulate Sandbucks passively.
-     */
     public void processFactoryProduction() {
         long currentTime = System.currentTimeMillis();
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -70,11 +66,13 @@ public class FactoryManager {
         int  cycles             = (int) (timePassed / productionInterval);
 
         if (cycles > 0) {
-            double baseAmount          = plugin.getUpgradeManager().getFactoryProductionAmount(data);
-            double productionBonus     = plugin.getEventManager().getFactoryProductionBonus();
-            // Augment sandbucks multiplier (e.g. 1.01 = +1%)
+            double baseAmount           = plugin.getUpgradeManager().getFactoryProductionAmount(data);
+            double productionBonus      = plugin.getEventManager().getFactoryProductionBonus();
             double augmentSandbucksMult = plugin.getAugmentManager().getSandbucksMultiplier(data);
-            double totalAmount          = baseAmount * (1.0 + productionBonus) * augmentSandbucksMult;
+            // ── Skill tree sandbucks multiplier ────────────────────────────
+            double skillSandbucksMult   = plugin.getSkillManager().getSandbucksMultiplier(data);
+            double totalAmount          = baseAmount * (1.0 + productionBonus)
+                    * augmentSandbucksMult * skillSandbucksMult;
 
             BigDecimal total = BigDecimal.valueOf(totalAmount * cycles);
             data.addSandbucks(total);

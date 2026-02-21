@@ -2,7 +2,9 @@ package com.pallux.sandsim.data;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class PlayerData {
@@ -33,12 +35,17 @@ public class PlayerData {
     private long lastFactoryProduction;
 
     // ── Augments (do NOT reset on rebirth) ───────────────────────────────────
-    /** The highest tier that has been fully researched (0 = none). */
     private int augmentUnlockedTier;
-    /** The tier currently being researched (0 = not researching). */
     private int augmentResearchingTier;
-    /** Epoch millis when the current research will complete (0 when not researching). */
     private long augmentResearchCompleteTime;
+
+    // ── Skill Tree (permanent, never reset) ───────────────────────────────────
+    /** Total skill points earned (based on level milestones). */
+    private int skillPointsEarned;
+    /** Total skill points spent. */
+    private int skillPointsSpent;
+    /** Set of purchased skill names (SkillType.name()). */
+    private Set<String> purchasedSkills;
 
     public PlayerData(UUID uuid) {
         this.uuid = uuid;
@@ -66,6 +73,10 @@ public class PlayerData {
         this.augmentUnlockedTier = 0;
         this.augmentResearchingTier = 0;
         this.augmentResearchCompleteTime = 0L;
+
+        this.skillPointsEarned = 0;
+        this.skillPointsSpent  = 0;
+        this.purchasedSkills   = new HashSet<>();
     }
 
     // ── Currency methods ──────────────────────────────────────────────────────
@@ -176,7 +187,7 @@ public class PlayerData {
         this.gemChance            = 0;
         this.gemMultiplier        = 0;
         this.efficiency           = 0;
-        // Note: augments are NOT reset here — they persist through rebirths
+        // Note: augments and skills are NOT reset here — they persist through rebirths
     }
 
     public void resetAll() {
@@ -190,11 +201,43 @@ public class PlayerData {
         this.factoryUnlocked          = false;
         this.factoryProductionSpeed   = 0;
         this.factoryProductionAmount  = 0;
-        // Augments survive a full /sandsim restart as well — comment out the
-        // three lines below if you want to wipe them on a full reset too.
+        // Augments and Skills survive a full /sandsim restart
+        // Comment out the lines below to wipe them on full reset too.
         // this.augmentUnlockedTier        = 0;
         // this.augmentResearchingTier     = 0;
         // this.augmentResearchCompleteTime = 0L;
+        // this.skillPointsEarned  = 0;
+        // this.skillPointsSpent   = 0;
+        // this.purchasedSkills.clear();
+    }
+
+    // ── Skill Tree methods ────────────────────────────────────────────────────
+
+    /** Returns the number of skill points currently available to spend. */
+    public int getAvailableSkillPoints() {
+        return Math.max(0, skillPointsEarned - skillPointsSpent);
+    }
+
+    /**
+     * Recalculates the total skill points earned from the player's current level.
+     * 1 point is earned per 5 levels starting at level 5.
+     * Should be called whenever level changes.
+     */
+    public void recalculateSkillPoints() {
+        this.skillPointsEarned = Math.max(0, level / 5);
+    }
+
+    public boolean hasSkill(SkillType skill) {
+        return purchasedSkills.contains(skill.name());
+    }
+
+    /**
+     * Purchases a skill, spending 1 skill point.
+     * Does NOT validate prerequisites — call SkillManager for that.
+     */
+    public void purchaseSkill(SkillType skill, int cost) {
+        purchasedSkills.add(skill.name());
+        skillPointsSpent += cost;
     }
 
     // ── Serialization ─────────────────────────────────────────────────────────
@@ -223,9 +266,14 @@ public class PlayerData {
         data.put("augmentUnlockedTier",         augmentUnlockedTier);
         data.put("augmentResearchingTier",      augmentResearchingTier);
         data.put("augmentResearchCompleteTime", augmentResearchCompleteTime);
+        // Skills
+        data.put("skillPointsEarned",  skillPointsEarned);
+        data.put("skillPointsSpent",   skillPointsSpent);
+        data.put("purchasedSkills",    new java.util.ArrayList<>(purchasedSkills));
         return data;
     }
 
+    @SuppressWarnings("unchecked")
     public static PlayerData deserialize(Map<String, Object> data) {
         UUID uuid = UUID.fromString((String) data.get("uuid"));
         PlayerData pd = new PlayerData(uuid);
@@ -258,10 +306,19 @@ public class PlayerData {
         pd.augmentResearchingTier      = (int)  data.getOrDefault("augmentResearchingTier", 0);
         pd.augmentResearchCompleteTime = toLong(data.getOrDefault("augmentResearchCompleteTime", 0L));
 
+        // Skills
+        pd.skillPointsEarned = (int) data.getOrDefault("skillPointsEarned", 0);
+        pd.skillPointsSpent  = (int) data.getOrDefault("skillPointsSpent",  0);
+        Object rawSkills = data.get("purchasedSkills");
+        if (rawSkills instanceof java.util.List<?> list) {
+            for (Object s : list) {
+                if (s instanceof String str) pd.purchasedSkills.add(str);
+            }
+        }
+
         return pd;
     }
 
-    /** Safely converts Integer or Long to long. */
     private static long toLong(Object obj) {
         if (obj instanceof Long l)    return l;
         if (obj instanceof Integer i) return i.longValue();
@@ -295,6 +352,13 @@ public class PlayerData {
     public void setAugmentResearchingTier(int tier)           { this.augmentResearchingTier = tier; }
     public long getAugmentResearchCompleteTime()              { return augmentResearchCompleteTime; }
     public void setAugmentResearchCompleteTime(long millis)   { this.augmentResearchCompleteTime = millis; }
+
+    // Skill getters/setters
+    public int  getSkillPointsEarned()             { return skillPointsEarned; }
+    public void setSkillPointsEarned(int v)        { this.skillPointsEarned = v; }
+    public int  getSkillPointsSpent()              { return skillPointsSpent; }
+    public void setSkillPointsSpent(int v)         { this.skillPointsSpent = v; }
+    public Set<String> getPurchasedSkills()        { return purchasedSkills; }
 
     // ── Upgrade type enum ─────────────────────────────────────────────────────
 

@@ -27,7 +27,6 @@ public class BlockBreakListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
 
-        // ── Sand blocks (normal + red) ─────────────────────────────────────
         if (plugin.getSandBlockManager().isSandBlock(event.getBlock())) {
 
             if (!plugin.getShovelManager().isSandShovel(player.getInventory().getItemInMainHand())) {
@@ -49,7 +48,6 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
-        // ── Non-sand block break protection ───────────────────────────────
         boolean protectionEnabled = plugin.getConfigManager().getMainConfig()
                 .getBoolean("protection.block-break-protection", true);
         if (protectionEnabled && !player.hasPermission("sandsim.bypass.blockbreak")) {
@@ -58,19 +56,20 @@ public class BlockBreakListener implements Listener {
     }
 
     private void processSandMining(Player player, PlayerData data, BlockBreakEvent event) {
-        // ── Red Sand bonus multiplier ──────────────────────────────────────
         double sandTypeMultiplier = plugin.getSandBlockManager().getSandTypeMultiplier(event.getBlock());
 
-        // ── Sand calculation ───────────────────────────────────────────────
         double sandUpgradeMultiplier = plugin.getUpgradeManager().getSandMultiplier(data);
         double rebirthMultiplier     = plugin.getRebirthManager().getRebirthMultiplier(data);
         double eventSandBonus        = plugin.getEventManager().getSandBonus();
         double augmentSandMultiplier = plugin.getAugmentManager().getSandMultiplier(data);
+        // ── Skill tree sand multiplier ─────────────────────────────────────
+        double skillSandMultiplier   = plugin.getSkillManager().getSandMultiplier(data);
 
         double totalMultiplier = sandUpgradeMultiplier
                 * rebirthMultiplier
                 * (1.0 + eventSandBonus)
                 * augmentSandMultiplier
+                * skillSandMultiplier
                 * sandTypeMultiplier;
 
         BigDecimal sandAmount = BigDecimal.valueOf(totalMultiplier);
@@ -81,21 +80,25 @@ public class BlockBreakListener implements Listener {
         int levelsGained = data.addXp(xpGain);
 
         if (levelsGained > 0) {
+            // Sync skill points whenever the player levels up
+            int newPoints = plugin.getSkillManager().syncSkillPoints(data);
+
             plugin.getMessageManager().sendMessage(player, "messages.level-up",
                     "%level%", String.valueOf(data.getLevel()));
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+
+            if (newPoints > 0) {
+                plugin.getMessageManager().sendMessage(player, "messages.skill-point-earned",
+                        "%points%", String.valueOf(newPoints),
+                        "%available%", String.valueOf(data.getAvailableSkillPoints()));
+            }
         }
 
-        // ── Cooldown ───────────────────────────────────────────────────────
         plugin.getSandBlockManager().setCooldown(event.getBlock().getLocation(), data);
 
-        // ── Explosion ──────────────────────────────────────────────────────
         checkSandExplosion(player, data, event, sandTypeMultiplier);
-
-        // ── Gems ───────────────────────────────────────────────────────────
         checkGemDrop(player, data);
 
-        // ── Action bar feedback ────────────────────────────────────────────
         plugin.getMessageManager().sendActionBar(player, "messages.sand-mined",
                 "%amount%", NumberFormatter.format(sandAmount));
 
@@ -117,10 +120,11 @@ public class BlockBreakListener implements Listener {
             double rebirthMult       = plugin.getRebirthManager().getRebirthMultiplier(data);
             double eventSandBonus    = plugin.getEventManager().getSandBonus();
             double augmentSandMult   = plugin.getAugmentManager().getSandMultiplier(data);
-            double baseMultiplier    = sandUpgrade * rebirthMult * (1.0 + eventSandBonus) * augmentSandMult;
+            double skillSandMult     = plugin.getSkillManager().getSandMultiplier(data);
+            double baseMultiplier    = sandUpgrade * rebirthMult * (1.0 + eventSandBonus)
+                    * augmentSandMult * skillSandMult;
             double redSandMult       = plugin.getSandBlockManager().getRedSandMultiplier();
 
-            // Normal blocks use base multiplier; red blocks use base * redSandMultiplier
             BigDecimal explosionSand = BigDecimal.valueOf(
                     (baseMultiplier * normalBlocks) + (baseMultiplier * redSandMult * redBlocks));
             data.addSand(explosionSand);
@@ -137,9 +141,6 @@ public class BlockBreakListener implements Listener {
         }
     }
 
-    /**
-     * Breaks sand blocks in radius and returns [normalCount, redSandCount].
-     */
     private int[] breakSandInRadius(org.bukkit.Location center, int radius, PlayerData data) {
         int normalCount = 0;
         int redCount    = 0;
@@ -178,8 +179,11 @@ public class BlockBreakListener implements Listener {
         if (random.nextDouble() * 100 < totalGemChance) {
             double gemUpgradeMultiplier  = plugin.getUpgradeManager().getGemMultiplier(data);
             double augmentGemsMultiplier = plugin.getAugmentManager().getGemsMultiplier(data);
+            // ── Skill tree gems multiplier ─────────────────────────────────
+            double skillGemsMultiplier   = plugin.getSkillManager().getGemsMultiplier(data);
 
-            BigDecimal gemAmount = BigDecimal.valueOf(gemUpgradeMultiplier * augmentGemsMultiplier);
+            BigDecimal gemAmount = BigDecimal.valueOf(
+                    gemUpgradeMultiplier * augmentGemsMultiplier * skillGemsMultiplier);
             data.addGems(gemAmount);
 
             plugin.getMessageManager().sendMessage(player, "messages.gem-found",

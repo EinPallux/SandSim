@@ -25,6 +25,7 @@ public class SandSimPlugin extends JavaPlugin {
     private SandBlockManager sandBlockManager;
     private EventManager eventManager;
     private AugmentManager augmentManager;
+    private SkillManager skillManager;
 
     @Override
     public void onEnable() {
@@ -45,6 +46,7 @@ public class SandSimPlugin extends JavaPlugin {
         this.leaderboardManager = new LeaderboardManager(this);
         this.sandBlockManager   = new SandBlockManager(this);
         this.augmentManager     = new AugmentManager(this);
+        this.skillManager       = new SkillManager(this);
 
         // EventManager must also be after configs
         this.eventManager = new EventManager(this);
@@ -83,7 +85,6 @@ public class SandSimPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerDropItemListener(this), this);
-        // Protection features (block place, drop, fall damage, server info hiding)
         getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
     }
 
@@ -99,6 +100,7 @@ public class SandSimPlugin extends JavaPlugin {
         getCommand("multiplier").setExecutor(new MultiplierCommand(this));
         getCommand("leaderboard").setExecutor(new LeaderboardCommand(this));
         getCommand("augments").setExecutor(new AugmentsCommand(this));
+        getCommand("skills").setExecutor(new SkillsCommand(this));
 
         SandSimCommand sandSimCommand = new SandSimCommand(this);
         getCommand("sandsim").setExecutor(sandSimCommand);
@@ -119,14 +121,12 @@ public class SandSimPlugin extends JavaPlugin {
                 dataManager.saveAllData(), 12000L, 12000L);
 
         // Augment research tick — check every 5 seconds for completed research
-        // and notify the player. Runs on the main thread so we can send messages safely.
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             for (org.bukkit.entity.Player p : Bukkit.getOnlinePlayers()) {
                 com.pallux.sandsim.data.PlayerData data = dataManager.getPlayerData(p);
                 int prevUnlocked    = data.getAugmentUnlockedTier();
                 int prevResearching = data.getAugmentResearchingTier();
                 augmentManager.tickResearch(data);
-                // If a tier just completed, notify the player
                 if (data.getAugmentUnlockedTier() > prevUnlocked && prevResearching > 0) {
                     com.pallux.sandsim.data.AugmentDefinition def =
                             augmentManager.getAugment(data.getAugmentUnlockedTier());
@@ -138,7 +138,7 @@ public class SandSimPlugin extends JavaPlugin {
                     }
                 }
             }
-        }, 100L, 100L); // every 5 seconds
+        }, 100L, 100L);
     }
 
     public void reload() {
@@ -162,4 +162,5 @@ public class SandSimPlugin extends JavaPlugin {
     public SandBlockManager getSandBlockManager()          { return sandBlockManager; }
     public EventManager getEventManager()                  { return eventManager; }
     public AugmentManager getAugmentManager()              { return augmentManager; }
+    public SkillManager getSkillManager()                  { return skillManager; }
 }

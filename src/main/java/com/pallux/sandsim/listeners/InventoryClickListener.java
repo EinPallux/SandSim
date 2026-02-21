@@ -48,6 +48,10 @@ public class InventoryClickListener implements Listener {
             event.setCancelled(true);
             ((AugmentsGUI) holder).handleClick(event, player);
             return;
+        } else if (holder instanceof SkillTreeGUI) {
+            event.setCancelled(true);
+            ((SkillTreeGUI) holder).handleClick(event, player);
+            return;
         }
 
         if (isLockedItem(event.getCurrentItem()) || isLockedItem(event.getCursor())) {

@@ -34,30 +34,52 @@ public class SandSimExpansion extends PlaceholderExpansion {
             case "sandbucks" -> NumberFormatter.format(data.getSandbucks());
             case "rebirths"  -> NumberFormatter.format(data.getRebirths());
 
-            // Rebirth-only multiplier (kept for backwards compat)
             case "multiplier" -> {
                 double mult = plugin.getRebirthManager().getRebirthMultiplier(data);
                 yield NumberFormatter.format(BigDecimal.valueOf(mult)) + "x";
             }
 
-            // ----------------------------------------------------------------
-            // %sandsim_overall_multiplier%
+            // ── %sandsim_overall_multiplier% ─────────────────────────────────
             // Combines ALL sand multiplier sources:
-            //   - Sand Upgrade multiplier  (e.g. level 50 = 51x)
-            //   - Rebirth multiplier       (e.g. 90 rebirths = 1.9x)
-            //   - Active Event sand bonus  (e.g. +50% = factor 1.5)
-            // Formula: sandUpgrade * rebirthMult * (1 + eventBonus)
-            // ----------------------------------------------------------------
+            //   - Sand Upgrade multiplier
+            //   - Rebirth multiplier
+            //   - Active Event sand bonus
+            //   - Augment sand multiplier
+            //   - Skill Tree sand multiplier  ← NEW
             case "overall_multiplier" -> {
-                double sandUpgrade    = plugin.getUpgradeManager()
-                        .getSandMultiplier(data);               // base 1, +1 per upgrade level
-                double rebirthMult    = plugin.getRebirthManager()
-                        .getRebirthMultiplier(data);            // e.g. 1.9 for 90 rebirths
-                double eventBonus     = plugin.getEventManager()
-                        .getSandBonus();                        // 0.0 or 0.5 etc.
-                double total          = sandUpgrade * rebirthMult * (1.0 + eventBonus);
+                double sandUpgrade    = plugin.getUpgradeManager().getSandMultiplier(data);
+                double rebirthMult    = plugin.getRebirthManager().getRebirthMultiplier(data);
+                double eventBonus     = plugin.getEventManager().getSandBonus();
+                double augmentMult    = plugin.getAugmentManager().getSandMultiplier(data);
+                double skillSandMult  = plugin.getSkillManager().getSandMultiplier(data);
+                double total          = sandUpgrade * rebirthMult * (1.0 + eventBonus)
+                        * augmentMult * skillSandMult;
                 yield NumberFormatter.format(BigDecimal.valueOf(total)) + "x";
             }
+
+            // ── %sandsim_overall_gems_multiplier% ────────────────────────────
+            // Augment gems mult × Skill Tree gems mult
+            case "overall_gems_multiplier" -> {
+                double augmentMult   = plugin.getAugmentManager().getGemsMultiplier(data);
+                double skillGemsMult = plugin.getSkillManager().getGemsMultiplier(data);
+                double gemUpgrade    = plugin.getUpgradeManager().getGemMultiplier(data);
+                double total         = gemUpgrade * augmentMult * skillGemsMult;
+                yield NumberFormatter.format(BigDecimal.valueOf(total)) + "x";
+            }
+
+            // ── %sandsim_overall_sandbucks_multiplier% ───────────────────────
+            // Augment sandbucks mult × Skill Tree sandbucks mult
+            case "overall_sandbucks_multiplier" -> {
+                double augmentMult  = plugin.getAugmentManager().getSandbucksMultiplier(data);
+                double skillSbMult  = plugin.getSkillManager().getSandbucksMultiplier(data);
+                double total        = augmentMult * skillSbMult;
+                yield NumberFormatter.format(BigDecimal.valueOf(total)) + "x";
+            }
+
+            // ── Skill points ─────────────────────────────────────────────────
+            case "skill_points"          -> String.valueOf(data.getAvailableSkillPoints());
+            case "skill_points_earned"   -> String.valueOf(data.getSkillPointsEarned());
+            case "skill_points_spent"    -> String.valueOf(data.getSkillPointsSpent());
 
             // Level & XP placeholders
             case "level"    -> String.valueOf(data.getLevel());

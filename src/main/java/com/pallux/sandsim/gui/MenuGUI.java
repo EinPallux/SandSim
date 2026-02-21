@@ -49,6 +49,7 @@ public class MenuGUI extends BaseGUI {
         // Row 3 buttons
         inventory.setItem(slotFromConfig(SEC + ".upgrades",    28), itemFromConfig(SEC + ".upgrades"));
         inventory.setItem(slotFromConfig(SEC + ".factory",     29), itemFromConfig(SEC + ".factory"));
+        inventory.setItem(slotFromConfig(SEC + ".skills",      30), itemFromConfig(SEC + ".skills"));
         inventory.setItem(slotFromConfig(SEC + ".augments",    31), itemFromConfig(SEC + ".augments"));
         inventory.setItem(slotFromConfig(SEC + ".leaderboard", 33), itemFromConfig(SEC + ".leaderboard"));
 
@@ -63,6 +64,7 @@ public class MenuGUI extends BaseGUI {
         if      (slot == slotFromConfig(SEC + ".rebirth",     15)) { player.closeInventory(); player.performCommand("rebirth"); }
         else if (slot == slotFromConfig(SEC + ".upgrades",    28)) { new UpgradesGUI(plugin).open(player); }
         else if (slot == slotFromConfig(SEC + ".factory",     29)) { new FactoryGUI(plugin).open(player); }
+        else if (slot == slotFromConfig(SEC + ".skills",      30)) { new SkillTreeGUI(plugin).open(player); }
         else if (slot == slotFromConfig(SEC + ".augments",    31)) { new AugmentsGUI(plugin).open(player); }
         else if (slot == slotFromConfig(SEC + ".leaderboard", 33)) { new LeaderboardGUI(plugin).open(player); }
     }

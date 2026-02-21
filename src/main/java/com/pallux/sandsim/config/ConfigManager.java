@@ -31,6 +31,7 @@ public class ConfigManager {
         saveDefaultConfig("upgrades.yml");
         saveDefaultConfig("events.yml");
         saveDefaultConfig("augments.yml");
+        saveDefaultConfig("skills.yml");
 
         loadConfig("config.yml");
         loadConfig("messages.yml");
@@ -39,6 +40,7 @@ public class ConfigManager {
         loadConfig("upgrades.yml");
         loadConfig("events.yml");
         loadConfig("augments.yml");
+        loadConfig("skills.yml");
     }
 
     private void saveDefaultConfig(String fileName) {
@@ -99,4 +101,11 @@ public class ConfigManager {
     public FileConfiguration getUpgradesConfig() { return getConfig("upgrades.yml"); }
     public FileConfiguration getEventsConfig()   { return getConfig("events.yml"); }
     public FileConfiguration getAugmentsConfig() { return getConfig("augments.yml"); }
+    public FileConfiguration getSkillsConfig() {
+        if (!configs.containsKey("skills.yml")) {
+            saveDefaultConfig("skills.yml");
+            loadConfig("skills.yml");
+        }
+        return getConfig("skills.yml");
+    }
 }
