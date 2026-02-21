@@ -27,6 +27,7 @@ public class PlayerData {
     private int gemChance;
     private int gemMultiplier;
     private int efficiency;
+    private int speed;   // 0 = not purchased, 1 = purchased
 
     // Factory upgrades
     private boolean factoryUnlocked;
@@ -40,11 +41,8 @@ public class PlayerData {
     private long augmentResearchCompleteTime;
 
     // ── Skill Tree (permanent, never reset) ───────────────────────────────────
-    /** Total skill points earned (based on level milestones). */
     private int skillPointsEarned;
-    /** Total skill points spent. */
     private int skillPointsSpent;
-    /** Set of purchased skill names (SkillType.name()). */
     private Set<String> purchasedSkills;
 
     public PlayerData(UUID uuid) {
@@ -64,6 +62,7 @@ public class PlayerData {
         this.gemChance = 0;
         this.gemMultiplier = 0;
         this.efficiency = 0;
+        this.speed = 0;
 
         this.factoryUnlocked = false;
         this.factoryProductionSpeed = 0;
@@ -146,6 +145,7 @@ public class PlayerData {
             case GEM_CHANCE             -> this.gemChance             += levels;
             case GEM_MULTIPLIER         -> this.gemMultiplier         += levels;
             case EFFICIENCY             -> this.efficiency            += levels;
+            case SPEED                  -> this.speed                 += levels;
             case FACTORY_PRODUCTION_SPEED  -> this.factoryProductionSpeed  += levels;
             case FACTORY_PRODUCTION_AMOUNT -> this.factoryProductionAmount += levels;
         }
@@ -160,6 +160,7 @@ public class PlayerData {
             case GEM_CHANCE                -> gemChance;
             case GEM_MULTIPLIER            -> gemMultiplier;
             case EFFICIENCY                -> efficiency;
+            case SPEED                     -> speed;
             case FACTORY_PRODUCTION_SPEED  -> factoryProductionSpeed;
             case FACTORY_PRODUCTION_AMOUNT -> factoryProductionAmount;
         };
@@ -174,6 +175,7 @@ public class PlayerData {
             case GEM_CHANCE             -> this.gemChance             = level;
             case GEM_MULTIPLIER         -> this.gemMultiplier         = level;
             case EFFICIENCY             -> this.efficiency            = level;
+            case SPEED                  -> this.speed                 = level;
             case FACTORY_PRODUCTION_SPEED  -> this.factoryProductionSpeed  = level;
             case FACTORY_PRODUCTION_AMOUNT -> this.factoryProductionAmount = level;
         }
@@ -187,7 +189,8 @@ public class PlayerData {
         this.gemChance            = 0;
         this.gemMultiplier        = 0;
         this.efficiency           = 0;
-        // Note: augments and skills are NOT reset here — they persist through rebirths
+        this.speed                = 0;   // Speed resets on rebirth
+        // Augments and skills are NOT reset here
     }
 
     public void resetAll() {
@@ -201,28 +204,14 @@ public class PlayerData {
         this.factoryUnlocked          = false;
         this.factoryProductionSpeed   = 0;
         this.factoryProductionAmount  = 0;
-        // Augments and Skills survive a full /sandsim restart
-        // Comment out the lines below to wipe them on full reset too.
-        // this.augmentUnlockedTier        = 0;
-        // this.augmentResearchingTier     = 0;
-        // this.augmentResearchCompleteTime = 0L;
-        // this.skillPointsEarned  = 0;
-        // this.skillPointsSpent   = 0;
-        // this.purchasedSkills.clear();
     }
 
     // ── Skill Tree methods ────────────────────────────────────────────────────
 
-    /** Returns the number of skill points currently available to spend. */
     public int getAvailableSkillPoints() {
         return Math.max(0, skillPointsEarned - skillPointsSpent);
     }
 
-    /**
-     * Recalculates the total skill points earned from the player's current level.
-     * 1 point is earned per 5 levels starting at level 5.
-     * Should be called whenever level changes.
-     */
     public void recalculateSkillPoints() {
         this.skillPointsEarned = Math.max(0, level / 5);
     }
@@ -231,10 +220,6 @@ public class PlayerData {
         return purchasedSkills.contains(skill.name());
     }
 
-    /**
-     * Purchases a skill, spending 1 skill point.
-     * Does NOT validate prerequisites — call SkillManager for that.
-     */
     public void purchaseSkill(SkillType skill, int cost) {
         purchasedSkills.add(skill.name());
         skillPointsSpent += cost;
@@ -258,6 +243,7 @@ public class PlayerData {
         data.put("gemChance",               gemChance);
         data.put("gemMultiplier",           gemMultiplier);
         data.put("efficiency",              efficiency);
+        data.put("speed",                   speed);
         data.put("factoryUnlocked",         factoryUnlocked);
         data.put("factoryProductionSpeed",  factoryProductionSpeed);
         data.put("factoryProductionAmount", factoryProductionAmount);
@@ -296,6 +282,7 @@ public class PlayerData {
         pd.gemChance              = (int)  data.getOrDefault("gemChance",              0);
         pd.gemMultiplier          = (int)  data.getOrDefault("gemMultiplier",          0);
         pd.efficiency             = (int)  data.getOrDefault("efficiency",             0);
+        pd.speed                  = (int)  data.getOrDefault("speed",                  0);
         pd.factoryUnlocked        = (boolean) data.getOrDefault("factoryUnlocked",    false);
         pd.factoryProductionSpeed = (int)  data.getOrDefault("factoryProductionSpeed",  0);
         pd.factoryProductionAmount= (int)  data.getOrDefault("factoryProductionAmount", 0);
@@ -370,6 +357,7 @@ public class PlayerData {
         GEM_CHANCE,
         GEM_MULTIPLIER,
         EFFICIENCY,
+        SPEED,
         FACTORY_PRODUCTION_SPEED,
         FACTORY_PRODUCTION_AMOUNT
     }

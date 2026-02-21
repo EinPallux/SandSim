@@ -36,6 +36,7 @@ public class UpgradesGUI extends BaseGUI {
         buildUpgrade(player, data, cfg, "gem-chance",            UpgradeType.GEM_CHANCE,             15);
         buildUpgrade(player, data, cfg, "efficiency",            UpgradeType.EFFICIENCY,             10);
         buildUpgrade(player, data, cfg, "gem-multiplier",        UpgradeType.GEM_MULTIPLIER,         16);
+        buildUpgrade(player, data, cfg, "speed",                 UpgradeType.SPEED,                  22);
 
         applyPlaceholderItems(SEC, cfg);
     }
@@ -69,6 +70,14 @@ public class UpgradesGUI extends BaseGUI {
             int v = (int) plugin.getUpgradeManager().getUpgradeValue(type, level);
             return v == 0 ? "None" : String.valueOf(v);
         }
+        if (type == UpgradeType.SPEED) {
+            return switch (level) {
+                case 0 -> "None";
+                case 1 -> "I";
+                case 2 -> "II";
+                default -> String.valueOf(level);
+            };
+        }
         double val = plugin.getUpgradeManager().getUpgradeValue(type, level);
         if (val == Math.floor(val) && !Double.isInfinite(val)) return String.valueOf((int) val);
         return String.valueOf(val);
@@ -87,12 +96,32 @@ public class UpgradesGUI extends BaseGUI {
         if (plugin.getUpgradeManager().purchaseUpgrade(data, type)) {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
             plugin.getMessageManager().sendMessage(player, "messages.upgrade-purchased");
-            if (type == UpgradeType.EFFICIENCY) plugin.getShovelManager().refreshShovel(player);
+            if (type == UpgradeType.EFFICIENCY) {
+                plugin.getShovelManager().refreshShovel(player);
+            }
+            if (type == UpgradeType.SPEED) {
+                // Apply Speed effect immediately
+                applySpeedEffect(player);
+            }
             setupInventory(player);
         } else {
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             plugin.getMessageManager().sendMessage(player, "messages.cannot-afford-upgrade");
         }
+    }
+
+    private void applySpeedEffect(Player player) {
+        PlayerData data = plugin.getDataManager().getPlayerData(player);
+        // amplifier 0 = Speed I, amplifier 1 = Speed II
+        int amplifier = data.getUpgradeLevel(PlayerData.UpgradeType.SPEED) - 1;
+        player.addPotionEffect(new org.bukkit.potion.PotionEffect(
+                org.bukkit.potion.PotionEffectType.SPEED,
+                Integer.MAX_VALUE,
+                amplifier,
+                false,
+                false,
+                false
+        ));
     }
 
     private UpgradeType resolveUpgradeType(int slot, FileConfiguration cfg) {
@@ -103,6 +132,7 @@ public class UpgradesGUI extends BaseGUI {
         if (slot == slotFromConfig(SEC + ".gem-chance",            cfg, 15)) return UpgradeType.GEM_CHANCE;
         if (slot == slotFromConfig(SEC + ".efficiency",            cfg, 10)) return UpgradeType.EFFICIENCY;
         if (slot == slotFromConfig(SEC + ".gem-multiplier",        cfg, 16)) return UpgradeType.GEM_MULTIPLIER;
+        if (slot == slotFromConfig(SEC + ".speed",                 cfg, 22)) return UpgradeType.SPEED;
         return null;
     }
 }

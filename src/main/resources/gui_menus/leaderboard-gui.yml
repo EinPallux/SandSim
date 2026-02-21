@@ -27,7 +27,6 @@ leaderboard-gui:
     lore:
       - "&7Return to the main menu"
 
-  # ── Category tab items ────────────────────────────────────────────────────
   type-sand:
     slot: 10
     material: SAND
@@ -64,14 +63,12 @@ leaderboard-gui:
     lore-unselected:
       - "&7Click to view"
 
-  # ── Entry slots and materials ─────────────────────────────────────────────
-  # Slots that receive ranked player entries (up to 10 entries).
   entry-slots: [28,29,30,31,32,33,34,37,38,39]
 
-  entry-material-1:       GOLD_BLOCK    # 1st place
-  entry-material-2:       IRON_BLOCK    # 2nd place
-  entry-material-3:       COPPER_BLOCK  # 3rd place
-  entry-material-default: PLAYER_HEAD   # 4th–10th
+  entry-material-1:       GOLD_BLOCK
+  entry-material-2:       IRON_BLOCK
+  entry-material-3:       COPPER_BLOCK
+  entry-material-default: PLAYER_HEAD
 
   entry:
     name: "&6#%rank% &7- &f%player%"

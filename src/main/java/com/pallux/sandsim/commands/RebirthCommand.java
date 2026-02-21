@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 
 public class RebirthCommand implements CommandExecutor {
     private final SandSimPlugin plugin;
@@ -27,9 +28,11 @@ public class RebirthCommand implements CommandExecutor {
         }
 
         if (plugin.getRebirthManager().performRebirth(data, maxRebirths)) {
-            // Rebirth resets the Efficiency upgrade to 0, so we must re-issue the
-            // shovel immediately — otherwise the player keeps the old enchanted shovel.
+            // Rebirth resets the Efficiency upgrade to 0, so refresh the shovel.
             plugin.getShovelManager().refreshShovel(player);
+
+            // Rebirth also resets the Speed upgrade — remove the potion effect.
+            player.removePotionEffect(PotionEffectType.SPEED);
 
             plugin.getMessageManager().sendMessage(player, "messages.rebirth-success", "%amount%", String.valueOf(maxRebirths));
             plugin.getMessageManager().sendMessage(player, "messages.rebirth-multiplier", "%multiplier%", String.format("%.2fx", plugin.getRebirthManager().getRebirthMultiplier(data)));

@@ -38,7 +38,6 @@ factory-gui:
     lore:
       - "&7Return to the main menu"
 
-  # ── Factory unlock item (shown when factory is not yet unlocked) ──────────
   unlock:
     slot: 4
     material: BARRIER
@@ -74,7 +73,6 @@ factory-gui:
       - ""
       - "&cYou must reach Level %req_level% first!"
 
-  # ── Factory core status item (shown when factory is unlocked) ─────────────
   core:
     slot: 4
     material: BLAST_FURNACE
@@ -89,7 +87,6 @@ factory-gui:
       - ""
       - "&8✦ Only produces while you are online"
 
-  # ── Factory upgrade items ─────────────────────────────────────────────────
   production-speed:
     slot: 19
     material: SUGAR

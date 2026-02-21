@@ -2,13 +2,8 @@
 # SandSim — Dashboard (Main Menu) GUI Configuration
 # ============================================================
 # This file controls ONLY the main /menu GUI.
-# Every other GUI has its own dedicated config file:
-#   augments-gui.yml    – /augments
-#   upgrades-gui.yml    – /upgrades
-#   factory-gui.yml     – /factory
-#   leaderboard-gui.yml – /leaderboard
-#   skilltree-gui.yml   – /skills
-#   admin-gui.yml       – /sandsim admin
+# Every other GUI has its own dedicated config file inside
+# the gui_menus/ folder.
 #
 # Available placeholders in name / lore:
 #   %player%     – player name
@@ -32,7 +27,6 @@ menu:
     material: GRAY_STAINED_GLASS_PANE
     slots: [0,1,2,4,6,7,8,9,10,11,12,14,15,16,17,18,19,20,21,22,23,24,25,26,27,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53]
 
-  # ── Stats item ────────────────────────────────────────────────────────────
   stats:
     slot: 3
     material: PLAYER_HEAD
@@ -47,7 +41,6 @@ menu:
       - "&7Multiplier: &a%multiplier%"
       - "&7Level: &a%level% &7(&e%level_xp%&7)"
 
-  # ── Guide / How-to-play item ──────────────────────────────────────────────
   guide:
     slot: 5
     material: BOOK
@@ -67,7 +60,6 @@ menu:
       - ""
       - "&aHave fun!"
 
-  # ── Rebirth item ──────────────────────────────────────────────────────────
   rebirth:
     slot: 13
     material: NETHER_STAR
@@ -88,7 +80,6 @@ menu:
       - ""
       - "&eClick to rebirth!"
 
-  # ── Navigation buttons ────────────────────────────────────────────────────
   upgrades:
     slot: 28
     material: ENCHANTING_TABLE

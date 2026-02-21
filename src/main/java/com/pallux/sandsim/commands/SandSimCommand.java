@@ -12,6 +12,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -173,7 +174,13 @@ public class SandSimCommand implements CommandExecutor, TabCompleter {
         if (args.length < 2) { plugin.getMessageManager().sendMessage(sender, "messages.usage-restart"); return true; }
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (!target.hasPlayedBefore() && !target.isOnline()) { plugin.getMessageManager().sendMessage(sender, "messages.player-never-played"); return true; }
-        plugin.getDataManager().getPlayerData(target.getUniqueId()).resetAll();
+        PlayerData data = plugin.getDataManager().getPlayerData(target.getUniqueId());
+        data.resetAll();
+        // If the target is online, remove the Speed effect
+        Player onlineTarget = target.getPlayer();
+        if (onlineTarget != null) {
+            onlineTarget.removePotionEffect(PotionEffectType.SPEED);
+        }
         plugin.getDataManager().savePlayerData(target.getUniqueId());
         plugin.getMessageManager().sendMessage(sender, "messages.restart-player", "%player%", target.getName());
         return true;
@@ -210,6 +217,20 @@ public class SandSimCommand implements CommandExecutor, TabCompleter {
 
         PlayerData data = plugin.getDataManager().getPlayerData(target.getUniqueId());
         data.setUpgradeLevel(upgradeType, amount);
+
+        // If admin sets speed upgrade, sync effect for online players
+        if (upgradeType == UpgradeType.SPEED) {
+            Player onlineTarget = target.getPlayer();
+            if (onlineTarget != null) {
+                if (amount >= 1) {
+                    onlineTarget.addPotionEffect(new org.bukkit.potion.PotionEffect(
+                            PotionEffectType.SPEED, Integer.MAX_VALUE, 0, false, false, false));
+                } else {
+                    onlineTarget.removePotionEffect(PotionEffectType.SPEED);
+                }
+            }
+        }
+
         plugin.getDataManager().savePlayerData(target.getUniqueId());
         plugin.getMessageManager().sendMessage(sender, "messages.set-upgrade", "%upgrade%", upgradeType.name(), "%level%", String.valueOf(amount), "%player%", target.getName());
         return true;
@@ -254,7 +275,7 @@ public class SandSimCommand implements CommandExecutor, TabCompleter {
             else completions.addAll(Arrays.asList("1","10","100","1000","10000"));
         } else if (args.length == 5) {
             if (args[0].equalsIgnoreCase("upgrades")&&args[1].equalsIgnoreCase("set"))
-                completions.addAll(Arrays.asList("1","10","50","100"));
+                completions.addAll(Arrays.asList("0","1"));
         }
 
         return completions.stream().filter(s->s.toLowerCase().startsWith(args[args.length-1].toLowerCase())).collect(Collectors.toList());

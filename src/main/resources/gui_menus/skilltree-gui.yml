@@ -1,8 +1,16 @@
 # ============================================================
-# SandSim — Skill Tree GUI Configuration
+# SandSim — Skill Tree GUI + Data Configuration
 # ============================================================
-# This file controls the visual layout of the Skill Tree GUI
-# (/skills). For skill bonus values and costs see skills.yml.
+# This file controls both the visual layout of the Skill Tree
+# GUI (/skills) AND the skill bonus/cost data (previously in
+# skills.yml).
+#
+# Rules:
+#  - Players earn 1 Skill Point per 5 levels.
+#  - Skills must be purchased in order within each track.
+#  - Skills are PERMANENT — they never reset on Rebirth.
+#  - Sand skill bonuses are ADDITIVE and stack across tiers.
+#    e.g. owning tiers 1 (+100%) and 2 (+150%) gives +250% total.
 #
 # Layout (54 slots):
 #   Row 0 — headers:  col 2 = Sand, col 4 = Gems, col 6 = Sandbucks
@@ -29,23 +37,69 @@
 #     %next_level% – next level milestone that grants a skill point
 # ============================================================
 
+# ── Skill Data ────────────────────────────────────────────────────────────────
+skills:
+
+  # ── Sand Track ────────────────────────────────────────────
+  sand:
+    tier-1:
+      bonus: 100.0       # +100% sand income
+      cost: 1
+    tier-2:
+      bonus: 150.0
+      cost: 5
+    tier-3:
+      bonus: 200.0
+      cost: 10
+    tier-4:
+      bonus: 250.0
+      cost: 15
+
+  # ── Gems Track ────────────────────────────────────────────
+  gems:
+    tier-1:
+      bonus: 50.0
+      cost: 1
+    tier-2:
+      bonus: 75.0
+      cost: 5
+    tier-3:
+      bonus: 100.0
+      cost: 10
+    tier-4:
+      bonus: 125.0
+      cost: 15
+
+  # ── Sandbucks Track ───────────────────────────────────────
+  sandbucks:
+    tier-1:
+      bonus: 25.0
+      cost: 1
+    tier-2:
+      bonus: 50.0
+      cost: 5
+    tier-3:
+      bonus: 75.0
+      cost: 10
+    tier-4:
+      bonus: 100.0
+      cost: 15
+
+# ── GUI Layout ────────────────────────────────────────────────────────────────
 skilltree-gui:
   title: "SandSim ➠ Skill Tree"
   size: 54
 
-  # ── Filler ────────────────────────────────────────────────────────────────
   filler:
     material: GRAY_STAINED_GLASS_PANE
     name: " "
 
-  # ── Navigation ────────────────────────────────────────────────────────────
   back:
     material: ARROW
     name: "&c&lBack to Menu"
     lore:
       - "&7Return to the main menu"
 
-  # ── Skill Points info item (slot 49) ─────────────────────────────────────
   info:
     material: NETHER_STAR
     name: "&e&lSkill Points"
@@ -59,7 +113,6 @@ skilltree-gui:
       - "&7Next point at &eLevel %next_level%"
       - "&8(1 point per 5 levels)"
 
-  # ── Track header items (row 0) ────────────────────────────────────────────
   sand-header:
     material: YELLOW_STAINED_GLASS_PANE
     name: "&e&lSand Multipliers"
@@ -92,9 +145,6 @@ skilltree-gui:
       - "&7boost your &6Sandbucks &7income!"
       - ""
       - "&7Current Skill Bonus: &6%sb_mult%"
-
-  # ── Skill item states ─────────────────────────────────────────────────────
-  # These templates apply to ALL skills regardless of track / tier.
 
   skill-states:
 

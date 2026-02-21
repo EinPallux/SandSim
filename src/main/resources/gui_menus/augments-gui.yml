@@ -1,0 +1,260 @@
+# ============================================================
+# SandSim — Augments GUI + Data Configuration
+# ============================================================
+# This file controls both the visual layout of the Augments
+# GUI (/augments) AND the augment tier data (previously in
+# augments.yml).
+#
+# ── Augment Data Fields ──────────────────────────────────────
+#   sand-percent      : % bonus to all Sand gained (replaces, not stacks)
+#   gems-percent      : % bonus to all Gems gained
+#   sandbucks-percent : % bonus to all Sandbucks gained
+#   research-time-seconds : how long research takes (in seconds)
+#   gem-cost          : Gems required to START research
+#
+# ── GUI Placeholders ─────────────────────────────────────────
+#   %name%           – display name of the augment (e.g. "Augment III")
+#   %tier%           – numeric tier number
+#   %sand%           – sand % bonus
+#   %gems%           – gems % bonus
+#   %sandbucks%      – sandbucks % bonus
+#   %cost%           – gem cost to research
+#   %time%           – formatted research time (e.g. "30m")
+#   %remaining%      – formatted time remaining (researching state only)
+#   %unlocked_tier%  – player's currently unlocked tier
+#   %researching%    – tier currently being researched (0 if none)
+# ============================================================
+
+# ── Augment Tier Data ─────────────────────────────────────────────────────────
+augments:
+
+  - tier: 1
+    sand-percent: 5.0
+    gems-percent: 0.0
+    sandbucks-percent: 0.0
+    research-time-seconds: 300        # 5 minutes
+    gem-cost: 10
+
+  - tier: 2
+    sand-percent: 10.0
+    gems-percent: 1.0
+    sandbucks-percent: 0.0
+    research-time-seconds: 900        # 15 minutes
+    gem-cost: 100
+
+  - tier: 3
+    sand-percent: 20.0
+    gems-percent: 5.0
+    sandbucks-percent: 1.0
+    research-time-seconds: 1800       # 30 minutes
+    gem-cost: 1000
+
+  - tier: 4
+    sand-percent: 30.0
+    gems-percent: 7.5
+    sandbucks-percent: 2.5
+    research-time-seconds: 2700       # 45 minutes
+    gem-cost: 2500
+
+  - tier: 5
+    sand-percent: 40.0
+    gems-percent: 10.0
+    sandbucks-percent: 5.0
+    research-time-seconds: 3600       # 60 minutes
+    gem-cost: 7500
+
+  - tier: 6
+    sand-percent: 50.0
+    gems-percent: 12.5
+    sandbucks-percent: 7.5
+    research-time-seconds: 5400       # 90 minutes
+    gem-cost: 10000
+
+  - tier: 7
+    sand-percent: 60.0
+    gems-percent: 15.0
+    sandbucks-percent: 10.0
+    research-time-seconds: 5400       # 90 minutes
+    gem-cost: 15000
+
+  - tier: 8
+    sand-percent: 70.0
+    gems-percent: 17.5
+    sandbucks-percent: 12.5
+    research-time-seconds: 5400       # 90 minutes
+    gem-cost: 15500
+
+  - tier: 9
+    sand-percent: 80.0
+    gems-percent: 20.0
+    sandbucks-percent: 15.0
+    research-time-seconds: 5400       # 90 minutes
+    gem-cost: 17500
+
+  - tier: 10
+    sand-percent: 90.0
+    gems-percent: 22.5
+    sandbucks-percent: 17.5
+    research-time-seconds: 7200       # 2 hours
+    gem-cost: 20000
+
+  - tier: 11
+    sand-percent: 100.0
+    gems-percent: 25.0
+    sandbucks-percent: 20.0
+    research-time-seconds: 7200       # 2 hours
+    gem-cost: 22500
+
+  - tier: 12
+    sand-percent: 110.0
+    gems-percent: 27.5
+    sandbucks-percent: 22.5
+    research-time-seconds: 7200       # 2 hours
+    gem-cost: 25000
+
+  - tier: 13
+    sand-percent: 120.0
+    gems-percent: 30.0
+    sandbucks-percent: 25.0
+    research-time-seconds: 7200       # 2 hours
+    gem-cost: 27500
+
+  - tier: 14
+    sand-percent: 130.0
+    gems-percent: 32.5
+    sandbucks-percent: 27.5
+    research-time-seconds: 7200       # 2 hours
+    gem-cost: 30000
+
+  - tier: 15
+    sand-percent: 140.0
+    gems-percent: 35.0
+    sandbucks-percent: 30.0
+    research-time-seconds: 7200       # 2 hours
+    gem-cost: 35000
+
+  - tier: 16
+    sand-percent: 150.0
+    gems-percent: 37.5
+    sandbucks-percent: 32.5
+    research-time-seconds: 14400      # 4 hours
+    gem-cost: 40000
+
+  - tier: 17
+    sand-percent: 160.0
+    gems-percent: 40.0
+    sandbucks-percent: 35.0
+    research-time-seconds: 14400      # 4 hours
+    gem-cost: 50000
+
+  - tier: 18
+    sand-percent: 170.0
+    gems-percent: 45.0
+    sandbucks-percent: 37.5
+    research-time-seconds: 14400      # 4 hours
+    gem-cost: 75000
+
+  - tier: 19
+    sand-percent: 180.0
+    gems-percent: 47.5
+    sandbucks-percent: 40.0
+    research-time-seconds: 14400      # 4 hours
+    gem-cost: 100000
+
+  - tier: 20
+    sand-percent: 190.0
+    gems-percent: 50.0
+    sandbucks-percent: 45.0
+    research-time-seconds: 14400      # 4 hours
+    gem-cost: 125000
+
+# ── GUI Layout ────────────────────────────────────────────────────────────────
+augments-gui:
+  title: "SandSim ➠ Augments"
+  size: 54
+
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    name: " "
+
+  back:
+    material: BARRIER
+    name: "&c&lBack to Menu"
+    lore:
+      - "&7Return to the main menu"
+
+  prev-page:
+    material: ARROW
+    name: "&c&l← Previous Page"
+    lore:
+      - "&7Go to page %page%"
+
+  next-page:
+    material: ARROW
+    name: "&a&lNext Page →"
+    lore:
+      - "&7Go to page %page%"
+
+  states:
+
+    unlocked:
+      material: GREEN_STAINED_GLASS_PANE
+      name: "&a&l%name%"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ ᴍᴇɴᴜ"
+        - ""
+        - "&7Bonuses &8(active, replaces previous)&7:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&a✔ &aResearched & Active"
+
+    researching:
+      material: YELLOW_STAINED_GLASS_PANE
+      name: "&e&l%name% &7(Researching)"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ ᴍᴇɴᴜ"
+        - ""
+        - "&7Bonuses on completion:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&e⏳ Researching..."
+        - "&7Time remaining: &e%remaining%"
+        - ""
+        - "&7Click to see progress."
+
+    available:
+      material: YELLOW_STAINED_GLASS_PANE
+      name: "&e&l%name% &7(Available)"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ ᴍᴇɴᴜ"
+        - ""
+        - "&7Bonuses on unlock:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&7Research Cost: &b%cost% Gems"
+        - "&7Research Time: &e%time%"
+        - ""
+        - "&aClick to start research!"
+
+    locked:
+      material: RED_STAINED_GLASS_PANE
+      name: "&c&l%name% &7(Locked)"
+      lore:
+        - "&8ᴀᴜɢᴍᴇɴᴛꜱ ᴍᴇɴᴜ"
+        - ""
+        - "&7Bonuses on unlock:"
+        - "  &e+%sand%% &7Sand"
+        - "  &b+%gems%% &7Gems"
+        - "  &6+%sandbucks%% &7Sandbucks"
+        - ""
+        - "&7Research Cost: &b%cost% Gems"
+        - "&7Research Time: &e%time%"
+        - ""
+        - "&c✖ Locked"
+        - "&7Research the previous Augment first."

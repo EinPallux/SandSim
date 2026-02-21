@@ -17,6 +17,9 @@ public class ConfigManager {
     private final Map<String, FileConfiguration> configs;
     private final Map<String, File> configFiles;
 
+    /** Sub-folder (relative to the plugin data folder) for all GUI configs. */
+    private static final String GUI_FOLDER = "gui_menus";
+
     public ConfigManager(SandSimPlugin plugin) {
         this.plugin = plugin;
         this.configs = new HashMap<>();
@@ -24,46 +27,62 @@ public class ConfigManager {
     }
 
     public void loadConfigs() {
-        // Core configs
-        saveDefaultConfig("config.yml");
-        saveDefaultConfig("messages.yml");
-        saveDefaultConfig("upgrades.yml");
-        saveDefaultConfig("events.yml");
-        saveDefaultConfig("augments.yml");
-        saveDefaultConfig("skills.yml");
-        saveDefaultConfig("items.yml");
+        // ── Core (non-GUI) configs ────────────────────────────────────────────
+        saveDefaultConfig("config.yml",   null);
+        saveDefaultConfig("messages.yml", null);
+        saveDefaultConfig("events.yml",   null);
+        saveDefaultConfig("items.yml",    null);
 
-        // GUI configs — one per GUI screen
-        saveDefaultConfig("gui.yml");              // Dashboard / main menu only
-        saveDefaultConfig("augments-gui.yml");     // Augments GUI
-        saveDefaultConfig("upgrades-gui.yml");     // Upgrades GUI
-        saveDefaultConfig("factory-gui.yml");      // Factory GUI
-        saveDefaultConfig("leaderboard-gui.yml");  // Leaderboard GUI
-        saveDefaultConfig("skilltree-gui.yml");    // Skill Tree GUI
-        saveDefaultConfig("admin-gui.yml");        // Admin GUI
+        // ── GUI configs (stored in gui_menus/ subfolder) ──────────────────────
+        // gui.yml          – Dashboard / main menu
+        // augments-gui.yml – Augments GUI + augment tier data (replaces augments.yml)
+        // upgrades-gui.yml – Upgrades GUI + upgrade costs   (replaces upgrades.yml)
+        // skilltree-gui.yml– Skill Tree GUI + skill data    (replaces skills.yml)
+        // factory-gui.yml  – Factory GUI
+        // leaderboard-gui.yml – Leaderboard GUI
+        // admin-gui.yml    – Admin GUI
+        saveDefaultConfig("gui.yml",              GUI_FOLDER);
+        saveDefaultConfig("augments-gui.yml",     GUI_FOLDER);
+        saveDefaultConfig("upgrades-gui.yml",     GUI_FOLDER);
+        saveDefaultConfig("skilltree-gui.yml",    GUI_FOLDER);
+        saveDefaultConfig("factory-gui.yml",      GUI_FOLDER);
+        saveDefaultConfig("leaderboard-gui.yml",  GUI_FOLDER);
+        saveDefaultConfig("admin-gui.yml",         GUI_FOLDER);
 
-        // Load all of them
-        loadConfig("config.yml");
-        loadConfig("messages.yml");
-        loadConfig("upgrades.yml");
-        loadConfig("events.yml");
-        loadConfig("augments.yml");
-        loadConfig("skills.yml");
-        loadConfig("items.yml");
-        loadConfig("gui.yml");
-        loadConfig("augments-gui.yml");
-        loadConfig("upgrades-gui.yml");
-        loadConfig("factory-gui.yml");
-        loadConfig("leaderboard-gui.yml");
-        loadConfig("skilltree-gui.yml");
-        loadConfig("admin-gui.yml");
+        // Load everything
+        loadConfig("config.yml",   null);
+        loadConfig("messages.yml", null);
+        loadConfig("events.yml",   null);
+        loadConfig("items.yml",    null);
+
+        loadConfig("gui.yml",             GUI_FOLDER);
+        loadConfig("augments-gui.yml",    GUI_FOLDER);
+        loadConfig("upgrades-gui.yml",    GUI_FOLDER);
+        loadConfig("skilltree-gui.yml",   GUI_FOLDER);
+        loadConfig("factory-gui.yml",     GUI_FOLDER);
+        loadConfig("leaderboard-gui.yml", GUI_FOLDER);
+        loadConfig("admin-gui.yml",       GUI_FOLDER);
     }
 
-    private void saveDefaultConfig(String fileName) {
-        File file = new File(plugin.getDataFolder(), fileName);
+    /**
+     * Copies the resource file to the plugin data folder (with optional subfolder)
+     * if it does not already exist on disk.
+     *
+     * @param fileName  the file name (e.g. "gui.yml")
+     * @param subFolder the subfolder inside the plugin data folder, or {@code null}
+     *                  for the root data folder
+     */
+    private void saveDefaultConfig(String fileName, String subFolder) {
+        File targetDir = (subFolder == null)
+                ? plugin.getDataFolder()
+                : new File(plugin.getDataFolder(), subFolder);
+        File file = new File(targetDir, fileName);
+
         if (!file.exists()) {
-            file.getParentFile().mkdirs();
-            try (InputStream in = plugin.getResource(fileName)) {
+            targetDir.mkdirs();
+            // Resource path: if it lives in gui_menus/ the jar must mirror that path
+            String resourcePath = (subFolder == null) ? fileName : subFolder + "/" + fileName;
+            try (InputStream in = plugin.getResource(resourcePath)) {
                 if (in != null) {
                     Files.copy(in, file.toPath());
                 } else {
@@ -75,11 +94,16 @@ public class ConfigManager {
         }
     }
 
-    private void loadConfig(String fileName) {
-        File file = new File(plugin.getDataFolder(), fileName);
+    private void loadConfig(String fileName, String subFolder) {
+        File targetDir = (subFolder == null)
+                ? plugin.getDataFolder()
+                : new File(plugin.getDataFolder(), subFolder);
+        File file = new File(targetDir, fileName);
+
         if (!file.exists()) {
-            saveDefaultConfig(fileName);
+            saveDefaultConfig(fileName, subFolder);
         }
+
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
         configs.put(fileName, config);
         configFiles.put(fileName, file);
@@ -110,20 +134,27 @@ public class ConfigManager {
 
     // ── Convenience getters ───────────────────────────────────────────────────
 
-    public FileConfiguration getMainConfig()        { return getConfig("config.yml"); }
-    public FileConfiguration getMessagesConfig()    { return getConfig("messages.yml"); }
-    public FileConfiguration getUpgradesConfig()    { return getConfig("upgrades.yml"); }
-    public FileConfiguration getEventsConfig()      { return getConfig("events.yml"); }
-    public FileConfiguration getAugmentsConfig()    { return getConfig("augments.yml"); }
-    public FileConfiguration getSkillsConfig()      { return getConfig("skills.yml"); }
-    public FileConfiguration getItemsConfig()       { return getConfig("items.yml"); }
+    /** Root configs */
+    public FileConfiguration getMainConfig()     { return getConfig("config.yml"); }
+    public FileConfiguration getMessagesConfig() { return getConfig("messages.yml"); }
+    public FileConfiguration getEventsConfig()   { return getConfig("events.yml"); }
+    public FileConfiguration getItemsConfig()    { return getConfig("items.yml"); }
 
-    // GUI-specific configs
-    public FileConfiguration getGuiConfig()         { return getConfig("gui.yml"); }
-    public FileConfiguration getAugmentsGuiConfig() { return getConfig("augments-gui.yml"); }
-    public FileConfiguration getUpgradesGuiConfig() { return getConfig("upgrades-gui.yml"); }
-    public FileConfiguration getFactoryGuiConfig()  { return getConfig("factory-gui.yml"); }
+    /** GUI configs (all in gui_menus/) */
+    public FileConfiguration getGuiConfig()            { return getConfig("gui.yml"); }
+    public FileConfiguration getAugmentsGuiConfig()    { return getConfig("augments-gui.yml"); }
+    public FileConfiguration getUpgradesGuiConfig()    { return getConfig("upgrades-gui.yml"); }
+    public FileConfiguration getSkillTreeGuiConfig()   { return getConfig("skilltree-gui.yml"); }
+    public FileConfiguration getFactoryGuiConfig()     { return getConfig("factory-gui.yml"); }
     public FileConfiguration getLeaderboardGuiConfig() { return getConfig("leaderboard-gui.yml"); }
-    public FileConfiguration getSkillTreeGuiConfig(){ return getConfig("skilltree-gui.yml"); }
-    public FileConfiguration getAdminGuiConfig()    { return getConfig("admin-gui.yml"); }
+    public FileConfiguration getAdminGuiConfig()       { return getConfig("admin-gui.yml"); }
+
+    /**
+     * Backward-compatibility aliases so that managers that previously called
+     * getAugmentsConfig() / getUpgradesConfig() / getSkillsConfig() continue to
+     * compile and receive the merged file.
+     */
+    public FileConfiguration getAugmentsConfig() { return getAugmentsGuiConfig(); }
+    public FileConfiguration getUpgradesConfig() { return getUpgradesGuiConfig(); }
+    public FileConfiguration getSkillsConfig()   { return getSkillTreeGuiConfig(); }
 }

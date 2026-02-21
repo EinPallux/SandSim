@@ -21,6 +21,7 @@ public class UpgradeManager {
     }
 
     private void loadUpgradeInfo() {
+        // Config now lives in gui_menus/upgrades-gui.yml, accessed via getUpgradesConfig()
         FileConfiguration config = plugin.getConfigManager().getUpgradesConfig();
 
         upgradeInfoMap.put(UpgradeType.SAND_MULTIPLIER, new UpgradeInfo(
@@ -57,6 +58,13 @@ public class UpgradeManager {
                 0, 5, 1,
                 config.getDouble("upgrades.efficiency.base-cost", 500),
                 config.getDouble("upgrades.efficiency.cost-multiplier", 3.0)));
+
+        // Speed: max 2 levels. Level 1 costs 50,000; Level 2 costs 250,000.
+        // cost-multiplier of 5.0 gives: 50000 * 5^0 = 50000, 50000 * 5^1 = 250000
+        upgradeInfoMap.put(UpgradeType.SPEED, new UpgradeInfo(
+                0, 2, 1,
+                config.getDouble("upgrades.speed.base-cost", 50000),
+                config.getDouble("upgrades.speed.cost-multiplier", 5.0)));
 
         upgradeInfoMap.put(UpgradeType.FACTORY_PRODUCTION_SPEED, new UpgradeInfo(
                 5.0, 1.0, -0.01,
@@ -107,6 +115,7 @@ public class UpgradeManager {
             case GEM_CHANCE                -> 50;
             case GEM_MULTIPLIER            -> 10;
             case EFFICIENCY                -> 5;
+            case SPEED                     -> 2;
             case FACTORY_PRODUCTION_SPEED  -> 400;
             case FACTORY_PRODUCTION_AMOUNT -> 1000;
         };
@@ -132,6 +141,10 @@ public class UpgradeManager {
     }
     public int getEfficiencyLevel(PlayerData data) {
         return data.getUpgradeLevel(UpgradeType.EFFICIENCY);
+    }
+    /** Returns true if the player has purchased the Speed upgrade. */
+    public boolean hasSpeedUpgrade(PlayerData data) {
+        return data.getUpgradeLevel(UpgradeType.SPEED) >= 1;
     }
     public double getFactoryProductionSpeed(PlayerData data) {
         return getUpgradeValue(UpgradeType.FACTORY_PRODUCTION_SPEED, data.getUpgradeLevel(UpgradeType.FACTORY_PRODUCTION_SPEED));
