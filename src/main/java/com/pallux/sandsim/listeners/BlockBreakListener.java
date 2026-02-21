@@ -27,38 +27,51 @@ public class BlockBreakListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
 
-        if (!plugin.getSandBlockManager().isSandBlock(event.getBlock())) return;
+        // ── Sand blocks (normal + red) ─────────────────────────────────────
+        if (plugin.getSandBlockManager().isSandBlock(event.getBlock())) {
 
-        if (!plugin.getShovelManager().isSandShovel(player.getInventory().getItemInMainHand())) {
-            event.setCancelled(true);
-            plugin.getMessageManager().sendMessage(player, "messages.need-shovel");
+            if (!plugin.getShovelManager().isSandShovel(player.getInventory().getItemInMainHand())) {
+                event.setCancelled(true);
+                plugin.getMessageManager().sendMessage(player, "messages.need-shovel");
+                return;
+            }
+
+            if (plugin.getSandBlockManager().isOnCooldown(event.getBlock().getLocation())) {
+                event.setCancelled(true);
+                return;
+            }
+
+            event.setDropItems(false);
+            event.setExpToDrop(0);
+
+            PlayerData data = plugin.getDataManager().getPlayerData(player);
+            processSandMining(player, data, event);
             return;
         }
 
-        if (plugin.getSandBlockManager().isOnCooldown(event.getBlock().getLocation())) {
+        // ── Non-sand block break protection ───────────────────────────────
+        boolean protectionEnabled = plugin.getConfigManager().getMainConfig()
+                .getBoolean("protection.block-break-protection", true);
+        if (protectionEnabled && !player.hasPermission("sandsim.bypass.blockbreak")) {
             event.setCancelled(true);
-            return;
         }
-
-        event.setDropItems(false);
-        event.setExpToDrop(0);
-
-        PlayerData data = plugin.getDataManager().getPlayerData(player);
-        processSandMining(player, data, event);
     }
 
     private void processSandMining(Player player, PlayerData data, BlockBreakEvent event) {
+        // ── Red Sand bonus multiplier ──────────────────────────────────────
+        double sandTypeMultiplier = plugin.getSandBlockManager().getSandTypeMultiplier(event.getBlock());
+
         // ── Sand calculation ───────────────────────────────────────────────
         double sandUpgradeMultiplier = plugin.getUpgradeManager().getSandMultiplier(data);
         double rebirthMultiplier     = plugin.getRebirthManager().getRebirthMultiplier(data);
         double eventSandBonus        = plugin.getEventManager().getSandBonus();
-        // Augment multiplier (e.g. 1.02 = +2%)
         double augmentSandMultiplier = plugin.getAugmentManager().getSandMultiplier(data);
 
         double totalMultiplier = sandUpgradeMultiplier
                 * rebirthMultiplier
                 * (1.0 + eventSandBonus)
-                * augmentSandMultiplier;
+                * augmentSandMultiplier
+                * sandTypeMultiplier;
 
         BigDecimal sandAmount = BigDecimal.valueOf(totalMultiplier);
         data.addSand(sandAmount);
@@ -77,7 +90,7 @@ public class BlockBreakListener implements Listener {
         plugin.getSandBlockManager().setCooldown(event.getBlock().getLocation(), data);
 
         // ── Explosion ──────────────────────────────────────────────────────
-        checkSandExplosion(player, data, event);
+        checkSandExplosion(player, data, event, sandTypeMultiplier);
 
         // ── Gems ───────────────────────────────────────────────────────────
         checkGemDrop(player, data);
@@ -89,36 +102,47 @@ public class BlockBreakListener implements Listener {
         player.playSound(player.getLocation(), Sound.BLOCK_SAND_BREAK, 1.0f, 1.0f);
     }
 
-    private void checkSandExplosion(Player player, PlayerData data, BlockBreakEvent event) {
+    private void checkSandExplosion(Player player, PlayerData data, BlockBreakEvent event,
+                                    double sandTypeMultiplier) {
         double explosionChance = plugin.getUpgradeManager().getSandExplosionChance(data);
         if (explosionChance <= 0) return;
 
         if (random.nextDouble() * 100 < explosionChance) {
             int radius = plugin.getUpgradeManager().getSandExplosionRadius(data);
-            int blocksExploded = breakSandInRadius(event.getBlock().getLocation(), radius, data);
+            int[] explodedCounts = breakSandInRadius(event.getBlock().getLocation(), radius, data);
+            int normalBlocks = explodedCounts[0];
+            int redBlocks    = explodedCounts[1];
 
             double sandUpgrade       = plugin.getUpgradeManager().getSandMultiplier(data);
             double rebirthMult       = plugin.getRebirthManager().getRebirthMultiplier(data);
             double eventSandBonus    = plugin.getEventManager().getSandBonus();
             double augmentSandMult   = plugin.getAugmentManager().getSandMultiplier(data);
-            double totalMultiplier   = sandUpgrade * rebirthMult * (1.0 + eventSandBonus) * augmentSandMult;
+            double baseMultiplier    = sandUpgrade * rebirthMult * (1.0 + eventSandBonus) * augmentSandMult;
+            double redSandMult       = plugin.getSandBlockManager().getRedSandMultiplier();
 
-            BigDecimal explosionSand = BigDecimal.valueOf(totalMultiplier * blocksExploded);
+            // Normal blocks use base multiplier; red blocks use base * redSandMultiplier
+            BigDecimal explosionSand = BigDecimal.valueOf(
+                    (baseMultiplier * normalBlocks) + (baseMultiplier * redSandMult * redBlocks));
             data.addSand(explosionSand);
 
-            if (blocksExploded > 0) {
-                long xpGain = blocksExploded * (1L + (long) plugin.getEventManager().getXpBonus());
+            int totalBlocks = normalBlocks + redBlocks;
+            if (totalBlocks > 0) {
+                long xpGain = totalBlocks * (1L + (long) plugin.getEventManager().getXpBonus());
                 data.addXp(xpGain);
             }
 
             plugin.getMessageManager().sendMessage(player, "messages.sand-explosion",
-                    "%blocks%", String.valueOf(blocksExploded));
+                    "%blocks%", String.valueOf(totalBlocks));
             player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.5f);
         }
     }
 
-    private int breakSandInRadius(org.bukkit.Location center, int radius, PlayerData data) {
-        int count = 0;
+    /**
+     * Breaks sand blocks in radius and returns [normalCount, redSandCount].
+     */
+    private int[] breakSandInRadius(org.bukkit.Location center, int radius, PlayerData data) {
+        int normalCount = 0;
+        int redCount    = 0;
         int cx = center.getBlockX(), cy = center.getBlockY(), cz = center.getBlockZ();
 
         for (int x = -radius; x <= radius; x++) {
@@ -133,13 +157,15 @@ public class BlockBreakListener implements Listener {
 
                     if (plugin.getSandBlockManager().isSandBlock(block) &&
                             !plugin.getSandBlockManager().isOnCooldown(loc)) {
+                        boolean isRed = plugin.getSandBlockManager().isRedSand(block);
                         plugin.getSandBlockManager().setCooldown(loc, data);
-                        count++;
+                        if (isRed) redCount++;
+                        else normalCount++;
                     }
                 }
             }
         }
-        return count;
+        return new int[]{ normalCount, redCount };
     }
 
     private void checkGemDrop(Player player, PlayerData data) {
@@ -151,7 +177,6 @@ public class BlockBreakListener implements Listener {
 
         if (random.nextDouble() * 100 < totalGemChance) {
             double gemUpgradeMultiplier  = plugin.getUpgradeManager().getGemMultiplier(data);
-            // Augment multiplier for gems (e.g. 1.01 = +1%)
             double augmentGemsMultiplier = plugin.getAugmentManager().getGemsMultiplier(data);
 
             BigDecimal gemAmount = BigDecimal.valueOf(gemUpgradeMultiplier * augmentGemsMultiplier);

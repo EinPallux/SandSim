@@ -87,7 +87,7 @@ menu:
       - "&eClick to open!"
 
   augments:
-    slot: 30
+    slot: 31
     material: EXPERIENCE_BOTTLE
     name: "&5&lAugments"
     lore:
@@ -100,7 +100,7 @@ menu:
       - "&eClick to open!"
 
   leaderboard:
-    slot: 31
+    slot: 33
     material: GOLD_INGOT
     name: "&e&lLeaderboard"
     lore:
@@ -116,7 +116,7 @@ menu:
     material: GRAY_DYE
     name: "&7&o???"
     lore: []
-    slots: [30,31,32,33,34]
+    slots: [30,32,34]
 
 # ============================================================
 # AUGMENTS GUI

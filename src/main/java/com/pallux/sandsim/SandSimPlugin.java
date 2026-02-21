@@ -83,6 +83,8 @@ public class SandSimPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerDropItemListener(this), this);
+        // Protection features (block place, drop, fall damage, server info hiding)
+        getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
     }
 
     private void registerCommands() {
