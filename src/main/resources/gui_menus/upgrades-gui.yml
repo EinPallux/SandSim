@@ -262,7 +262,7 @@ upgrades-gui:
 
   gem-multiplier:
     slot: 16
-    material: DIAMOND_BLOCK
+    material: EMERALD_BLOCK
     name: "&b&lGem Multiplier"
     lore:
       - "&8ᴜᴘɢʀᴀᴅᴇꜱ ᴍᴇɴᴜ"
