@@ -70,7 +70,7 @@ upgrades-gui:
 
   sand-multiplier:
     slot: 11
-    material: DIAMOND
+    material: SAND
     name: "&e&lSand Multiplier"
     lore:
       - "&8ᴜᴘɢʀᴀᴅᴇꜱ ᴍᴇɴᴜ"
