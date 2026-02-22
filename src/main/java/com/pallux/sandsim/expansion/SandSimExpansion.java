@@ -39,13 +39,6 @@ public class SandSimExpansion extends PlaceholderExpansion {
                 yield NumberFormatter.format(BigDecimal.valueOf(mult)) + "x";
             }
 
-            // ── %sandsim_overall_multiplier% ─────────────────────────────────
-            // Combines ALL sand multiplier sources:
-            //   - Sand Upgrade multiplier
-            //   - Rebirth multiplier
-            //   - Active Event sand bonus
-            //   - Augment sand multiplier
-            //   - Skill Tree sand multiplier  ← NEW
             case "overall_multiplier" -> {
                 double sandUpgrade    = plugin.getUpgradeManager().getSandMultiplier(data);
                 double rebirthMult    = plugin.getRebirthManager().getRebirthMultiplier(data);
@@ -57,8 +50,6 @@ public class SandSimExpansion extends PlaceholderExpansion {
                 yield NumberFormatter.format(BigDecimal.valueOf(total)) + "x";
             }
 
-            // ── %sandsim_overall_gems_multiplier% ────────────────────────────
-            // Augment gems mult × Skill Tree gems mult
             case "overall_gems_multiplier" -> {
                 double augmentMult   = plugin.getAugmentManager().getGemsMultiplier(data);
                 double skillGemsMult = plugin.getSkillManager().getGemsMultiplier(data);
@@ -67,8 +58,6 @@ public class SandSimExpansion extends PlaceholderExpansion {
                 yield NumberFormatter.format(BigDecimal.valueOf(total)) + "x";
             }
 
-            // ── %sandsim_overall_sandbucks_multiplier% ───────────────────────
-            // Augment sandbucks mult × Skill Tree sandbucks mult
             case "overall_sandbucks_multiplier" -> {
                 double augmentMult  = plugin.getAugmentManager().getSandbucksMultiplier(data);
                 double skillSbMult  = plugin.getSkillManager().getSandbucksMultiplier(data);
@@ -76,16 +65,13 @@ public class SandSimExpansion extends PlaceholderExpansion {
                 yield NumberFormatter.format(BigDecimal.valueOf(total)) + "x";
             }
 
-            // ── Skill points ─────────────────────────────────────────────────
             case "skill_points"          -> String.valueOf(data.getAvailableSkillPoints());
             case "skill_points_earned"   -> String.valueOf(data.getSkillPointsEarned());
             case "skill_points_spent"    -> String.valueOf(data.getSkillPointsSpent());
 
-            // Level & XP placeholders
             case "level"    -> String.valueOf(data.getLevel());
             case "level_xp" -> data.getXpPercent() + "%";
 
-            // Raw values
             case "sand_raw"       -> data.getSand().toPlainString();
             case "gems_raw"       -> data.getGems().toPlainString();
             case "sandbucks_raw"  -> data.getSandbucks().toPlainString();

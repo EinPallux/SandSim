@@ -78,7 +78,7 @@ public class SandSimCommand implements CommandExecutor, TabCompleter {
             case "sand"      -> data.addSand(amount);
             case "gems"      -> data.addGems(amount);
             case "sandbucks" -> data.addSandbucks(amount);
-            case "rebirths"  -> data.addRebirths(amount.intValue());
+            case "rebirths"  -> data.addRebirths(amount.longValue());
             default -> { plugin.getMessageManager().sendMessage(sender, "messages.invalid-currency"); return true; }
         }
         plugin.getDataManager().savePlayerData(target.getUniqueId());
@@ -103,7 +103,7 @@ public class SandSimCommand implements CommandExecutor, TabCompleter {
             case "sand"      -> data.removeSand(amount);
             case "gems"      -> data.removeGems(amount);
             case "sandbucks" -> data.removeSandbucks(amount);
-            case "rebirths"  -> data.setRebirths(Math.max(0, data.getRebirths() - amount.intValue()));
+            case "rebirths"  -> data.setRebirths(Math.max(0L, data.getRebirths() - amount.longValue()));
             default -> { plugin.getMessageManager().sendMessage(sender, "messages.invalid-currency"); return true; }
         }
         plugin.getDataManager().savePlayerData(target.getUniqueId());
@@ -128,7 +128,7 @@ public class SandSimCommand implements CommandExecutor, TabCompleter {
             case "sand"      -> data.setSand(amount);
             case "gems"      -> data.setGems(amount);
             case "sandbucks" -> data.setSandbucks(amount);
-            case "rebirths"  -> data.setRebirths(amount.intValue());
+            case "rebirths"  -> data.setRebirths(amount.longValue());
             default -> { plugin.getMessageManager().sendMessage(sender, "messages.invalid-currency"); return true; }
         }
         plugin.getDataManager().savePlayerData(target.getUniqueId());
@@ -149,7 +149,7 @@ public class SandSimCommand implements CommandExecutor, TabCompleter {
             case "sand"      -> data.setSand(BigDecimal.ZERO);
             case "gems"      -> data.setGems(BigDecimal.ZERO);
             case "sandbucks" -> data.setSandbucks(BigDecimal.ZERO);
-            case "rebirths"  -> data.setRebirths(0);
+            case "rebirths"  -> data.setRebirths(0L);
             default -> { plugin.getMessageManager().sendMessage(sender, "messages.invalid-currency"); return true; }
         }
         plugin.getDataManager().savePlayerData(target.getUniqueId());
@@ -163,7 +163,10 @@ public class SandSimCommand implements CommandExecutor, TabCompleter {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (!target.hasPlayedBefore() && !target.isOnline()) { plugin.getMessageManager().sendMessage(sender, "messages.player-never-played"); return true; }
         PlayerData data = plugin.getDataManager().getPlayerData(target.getUniqueId());
-        data.setSand(BigDecimal.ZERO); data.setGems(BigDecimal.ZERO); data.setSandbucks(BigDecimal.ZERO); data.setRebirths(0);
+        data.setSand(BigDecimal.ZERO);
+        data.setGems(BigDecimal.ZERO);
+        data.setSandbucks(BigDecimal.ZERO);
+        data.setRebirths(0L);
         plugin.getDataManager().savePlayerData(target.getUniqueId());
         plugin.getMessageManager().sendMessage(sender, "messages.reset-all-currencies", "%player%", target.getName());
         return true;

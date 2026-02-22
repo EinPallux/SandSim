@@ -13,14 +13,6 @@ public class RebirthManager {
     private BigDecimal rebirthCost;
     private double multiplierPerRebirth;
 
-    /**
-     * We cap rebirths-per-operation at this value to avoid overflowing
-     * {@code int} fields elsewhere (PlayerData stores rebirths as int).
-     * Integer.MAX_VALUE is ~2.1 billion which is already an absurd number
-     * of rebirths, so this is a safe ceiling.
-     */
-    private static final long MAX_REBIRTHS_PER_OP = Integer.MAX_VALUE;
-
     public RebirthManager(SandSimPlugin plugin) {
         this.plugin = plugin;
         loadConfig();
@@ -37,15 +29,17 @@ public class RebirthManager {
     }
 
     /**
-     * Returns how many rebirths the player can currently afford, capped at
-     * {@link Integer#MAX_VALUE} so the result is always safe to cast to int.
+     * Returns how many rebirths the player can currently afford.
+     * Uses BigDecimal throughout to support arbitrarily large sand amounts.
      */
     public long getMaxRebirths(PlayerData data) {
         if (data.getSand().compareTo(rebirthCost) < 0) return 0L;
         BigDecimal result = data.getSand().divide(rebirthCost, 0, RoundingMode.DOWN);
-        // Cap to avoid overflowing int storage in PlayerData
-        long value = result.min(BigDecimal.valueOf(MAX_REBIRTHS_PER_OP)).longValue();
-        return Math.max(0L, value);
+        // Cap at Long.MAX_VALUE to avoid overflow when converting to long
+        if (result.compareTo(BigDecimal.valueOf(Long.MAX_VALUE)) > 0) {
+            return Long.MAX_VALUE;
+        }
+        return result.longValue();
     }
 
     /**
@@ -61,11 +55,11 @@ public class RebirthManager {
         if (data.getSand().compareTo(totalCost) < 0) return false;
         data.removeSand(totalCost);
         data.resetUpgrades();
-        data.addRebirths((int) Math.min(amount, MAX_REBIRTHS_PER_OP));
+        data.addRebirths(amount);
         return true;
     }
 
-    public double getRebirthMultiplier(int rebirths) {
+    public double getRebirthMultiplier(long rebirths) {
         return 1.0 + (rebirths * multiplierPerRebirth);
     }
 

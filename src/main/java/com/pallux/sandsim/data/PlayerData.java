@@ -13,7 +13,7 @@ public class PlayerData {
     private BigDecimal sand;
     private BigDecimal gems;
     private BigDecimal sandbucks;
-    private int rebirths;
+    private long rebirths;
 
     // Leveling
     private int level;
@@ -58,7 +58,7 @@ public class PlayerData {
         this.sand = BigDecimal.ZERO;
         this.gems = BigDecimal.ZERO;
         this.sandbucks = BigDecimal.ZERO;
-        this.rebirths = 0;
+        this.rebirths = 0L;
 
         this.level = 1;
         this.xp = 0;
@@ -117,7 +117,7 @@ public class PlayerData {
         if (this.sandbucks.compareTo(BigDecimal.ZERO) < 0) this.sandbucks = BigDecimal.ZERO;
     }
 
-    public void addRebirths(int amount) {
+    public void addRebirths(long amount) {
         this.rebirths += amount;
     }
 
@@ -237,7 +237,7 @@ public class PlayerData {
         this.sand       = BigDecimal.ZERO;
         this.gems       = BigDecimal.ZERO;
         this.sandbucks  = BigDecimal.ZERO;
-        this.rebirths   = 0;
+        this.rebirths   = 0L;
         this.level      = 1;
         this.xp         = 0;
         resetUpgrades();
@@ -309,7 +309,7 @@ public class PlayerData {
         pd.sand                   = new BigDecimal((String) data.getOrDefault("sand",       "0"));
         pd.gems                   = new BigDecimal((String) data.getOrDefault("gems",       "0"));
         pd.sandbucks              = new BigDecimal((String) data.getOrDefault("sandbucks",  "0"));
-        pd.rebirths               = (int)  data.getOrDefault("rebirths",               0);
+        pd.rebirths               = toLong(data.getOrDefault("rebirths", 0L));
         pd.level                  = (int)  data.getOrDefault("level",                  1);
 
         Object xpObj = data.getOrDefault("xp", 0L);
@@ -365,8 +365,8 @@ public class PlayerData {
     public void setGems(BigDecimal gems)          { this.gems = gems; }
     public BigDecimal getSandbucks()              { return sandbucks; }
     public void setSandbucks(BigDecimal sb)       { this.sandbucks = sb; }
-    public int getRebirths()                      { return rebirths; }
-    public void setRebirths(int rebirths)         { this.rebirths = rebirths; }
+    public long getRebirths()                     { return rebirths; }
+    public void setRebirths(long rebirths)        { this.rebirths = rebirths; }
     public boolean isFactoryUnlocked()            { return factoryUnlocked; }
     public void setFactoryUnlocked(boolean v)     { this.factoryUnlocked = v; }
     public long getLastFactoryProduction()        { return lastFactoryProduction; }
