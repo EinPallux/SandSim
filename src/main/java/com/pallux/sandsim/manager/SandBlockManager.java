@@ -17,8 +17,10 @@ public class SandBlockManager {
     private final Map<Location, Long> cooldowns;
     private Material sandMaterial;
     private Material redSandMaterial;
+    private Material soulSoilMaterial;
     private Material cooldownMaterial;
     private double redSandMultiplier;
+    private double soulSoilMultiplier;
 
     public SandBlockManager(SandSimPlugin plugin) {
         this.plugin = plugin;
@@ -28,19 +30,25 @@ public class SandBlockManager {
 
     private void loadConfig() {
         FileConfiguration config = plugin.getConfigManager().getMainConfig();
-        String sandMat     = config.getString("sand-block.material",          "SAND");
-        String redSandMat  = config.getString("sand-block.red-sand-material", "RED_SAND");
-        String cooldownMat = config.getString("sand-block.cooldown-material", "BEDROCK");
-        this.redSandMultiplier = config.getDouble("sand-block.red-sand-multiplier", 1.5);
+        String sandMat      = config.getString("sand-block.material",           "SAND");
+        String redSandMat   = config.getString("sand-block.red-sand-material",  "RED_SAND");
+        String soulSoilMat  = config.getString("sand-block.soul-soil-material", "SOUL_SOIL");
+        String cooldownMat  = config.getString("sand-block.cooldown-material",  "BEDROCK");
 
-        try { this.sandMaterial     = Material.valueOf(sandMat);    } catch (IllegalArgumentException e) { this.sandMaterial     = Material.SAND;     }
-        try { this.redSandMaterial  = Material.valueOf(redSandMat); } catch (IllegalArgumentException e) { this.redSandMaterial  = Material.RED_SAND; }
-        try { this.cooldownMaterial = Material.valueOf(cooldownMat); } catch (IllegalArgumentException e) { this.cooldownMaterial = Material.BEDROCK;  }
+        this.redSandMultiplier  = config.getDouble("sand-block.red-sand-multiplier",  1.5);
+        this.soulSoilMultiplier = config.getDouble("sand-block.soul-soil-multiplier", 2.0);
+
+        try { this.sandMaterial     = Material.valueOf(sandMat);     } catch (IllegalArgumentException e) { this.sandMaterial     = Material.SAND;      }
+        try { this.redSandMaterial  = Material.valueOf(redSandMat);  } catch (IllegalArgumentException e) { this.redSandMaterial  = Material.RED_SAND;  }
+        try { this.soulSoilMaterial = Material.valueOf(soulSoilMat); } catch (IllegalArgumentException e) { this.soulSoilMaterial = Material.SOUL_SOIL; }
+        try { this.cooldownMaterial = Material.valueOf(cooldownMat); } catch (IllegalArgumentException e) { this.cooldownMaterial = Material.BEDROCK;   }
     }
 
-    /** Returns true if the block is a mineable sand block (normal or red). */
+    /** Returns true if the block is a mineable sand block (normal, red, or soul soil). */
     public boolean isSandBlock(Block block) {
-        return block.getType() == sandMaterial || block.getType() == redSandMaterial;
+        return block.getType() == sandMaterial
+                || block.getType() == redSandMaterial
+                || block.getType() == soulSoilMaterial;
     }
 
     /** Returns true if the block is specifically normal Sand. */
@@ -53,12 +61,19 @@ public class SandBlockManager {
         return block.getType() == redSandMaterial;
     }
 
+    /** Returns true if the block is specifically Soul Soil. */
+    public boolean isSoulSoil(Block block) {
+        return block.getType() == soulSoilMaterial;
+    }
+
     /**
      * Returns the bonus multiplier for this specific block type.
-     * Normal sand → 1.0, Red sand → redSandMultiplier (default 1.5).
+     * Normal sand → 1.0, Red sand → redSandMultiplier (default 1.5),
+     * Soul Soil → soulSoilMultiplier (default 2.0).
      */
     public double getSandTypeMultiplier(Block block) {
-        if (block.getType() == redSandMaterial) return redSandMultiplier;
+        if (block.getType() == redSandMaterial)  return redSandMultiplier;
+        if (block.getType() == soulSoilMaterial) return soulSoilMultiplier;
         return 1.0;
     }
 
@@ -77,7 +92,7 @@ public class SandBlockManager {
         cooldowns.put(location.clone(), cooldownEnd);
 
         Block block = location.getBlock();
-        // Remember which material to restore (sand or red sand)
+        // Remember which material to restore (sand, red sand, or soul soil)
         Material originalMaterial = block.getType();
         Bukkit.getScheduler().runTask(plugin, () -> block.setType(cooldownMaterial));
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -93,6 +108,8 @@ public class SandBlockManager {
 
     public Material getSandMaterial()        { return sandMaterial; }
     public Material getRedSandMaterial()     { return redSandMaterial; }
+    public Material getSoulSoilMaterial()    { return soulSoilMaterial; }
     public Material getCooldownMaterial()    { return cooldownMaterial; }
     public double   getRedSandMultiplier()   { return redSandMultiplier; }
+    public double   getSoulSoilMultiplier()  { return soulSoilMultiplier; }
 }

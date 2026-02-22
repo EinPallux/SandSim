@@ -28,6 +28,8 @@ public class PlayerData {
     private int gemMultiplier;
     private int efficiency;
     private int speed;   // 0 = not purchased, 1 = purchased
+    private int sandJackpot;
+    private int gemJackpot;
 
     // Factory upgrades
     private boolean factoryUnlocked;
@@ -44,6 +46,12 @@ public class PlayerData {
     private int skillPointsEarned;
     private int skillPointsSpent;
     private Set<String> purchasedSkills;
+
+    // ── Jackpot runtime state (transient, NOT persisted) ─────────────────────
+    /** Epoch-millis when the Sand Jackpot effect expires. 0 = not active. */
+    private transient long sandJackpotExpireTime = 0L;
+    /** Epoch-millis when the Gem Jackpot effect expires. 0 = not active. */
+    private transient long gemJackpotExpireTime  = 0L;
 
     public PlayerData(UUID uuid) {
         this.uuid = uuid;
@@ -63,6 +71,8 @@ public class PlayerData {
         this.gemMultiplier = 0;
         this.efficiency = 0;
         this.speed = 0;
+        this.sandJackpot = 0;
+        this.gemJackpot  = 0;
 
         this.factoryUnlocked = false;
         this.factoryProductionSpeed = 0;
@@ -111,6 +121,28 @@ public class PlayerData {
         this.rebirths += amount;
     }
 
+    // ── Jackpot runtime state ─────────────────────────────────────────────────
+
+    /** Returns true while the Sand Jackpot (+5x) is active. */
+    public boolean isSandJackpotActive() {
+        return sandJackpotExpireTime > 0 && System.currentTimeMillis() < sandJackpotExpireTime;
+    }
+
+    /** Returns true while the Gem Jackpot (+5x) is active. */
+    public boolean isGemJackpotActive() {
+        return gemJackpotExpireTime > 0 && System.currentTimeMillis() < gemJackpotExpireTime;
+    }
+
+    /** Activates the Sand Jackpot for the given number of milliseconds. */
+    public void activateSandJackpot(long durationMillis) {
+        this.sandJackpotExpireTime = System.currentTimeMillis() + durationMillis;
+    }
+
+    /** Activates the Gem Jackpot for the given number of milliseconds. */
+    public void activateGemJackpot(long durationMillis) {
+        this.gemJackpotExpireTime = System.currentTimeMillis() + durationMillis;
+    }
+
     // ── Leveling methods ──────────────────────────────────────────────────────
 
     public long getXpForNextLevel() {
@@ -138,14 +170,16 @@ public class PlayerData {
 
     public void upgradeLevel(UpgradeType type, int levels) {
         switch (type) {
-            case SAND_MULTIPLIER        -> this.sandMultiplier        += levels;
-            case SAND_EXPLOSION_CHANCE  -> this.sandExplosionChance   += levels;
-            case SAND_EXPLOSION_RADIUS  -> this.sandExplosionRadius   += levels;
-            case SAND_COOLDOWN          -> this.sandCooldown          += levels;
-            case GEM_CHANCE             -> this.gemChance             += levels;
-            case GEM_MULTIPLIER         -> this.gemMultiplier         += levels;
-            case EFFICIENCY             -> this.efficiency            += levels;
-            case SPEED                  -> this.speed                 += levels;
+            case SAND_MULTIPLIER           -> this.sandMultiplier        += levels;
+            case SAND_EXPLOSION_CHANCE     -> this.sandExplosionChance   += levels;
+            case SAND_EXPLOSION_RADIUS     -> this.sandExplosionRadius   += levels;
+            case SAND_COOLDOWN             -> this.sandCooldown          += levels;
+            case GEM_CHANCE                -> this.gemChance             += levels;
+            case GEM_MULTIPLIER            -> this.gemMultiplier         += levels;
+            case EFFICIENCY                -> this.efficiency            += levels;
+            case SPEED                     -> this.speed                 += levels;
+            case SAND_JACKPOT              -> this.sandJackpot           += levels;
+            case GEM_JACKPOT               -> this.gemJackpot            += levels;
             case FACTORY_PRODUCTION_SPEED  -> this.factoryProductionSpeed  += levels;
             case FACTORY_PRODUCTION_AMOUNT -> this.factoryProductionAmount += levels;
         }
@@ -161,6 +195,8 @@ public class PlayerData {
             case GEM_MULTIPLIER            -> gemMultiplier;
             case EFFICIENCY                -> efficiency;
             case SPEED                     -> speed;
+            case SAND_JACKPOT              -> sandJackpot;
+            case GEM_JACKPOT               -> gemJackpot;
             case FACTORY_PRODUCTION_SPEED  -> factoryProductionSpeed;
             case FACTORY_PRODUCTION_AMOUNT -> factoryProductionAmount;
         };
@@ -168,14 +204,16 @@ public class PlayerData {
 
     public void setUpgradeLevel(UpgradeType type, int level) {
         switch (type) {
-            case SAND_MULTIPLIER        -> this.sandMultiplier        = level;
-            case SAND_EXPLOSION_CHANCE  -> this.sandExplosionChance   = level;
-            case SAND_EXPLOSION_RADIUS  -> this.sandExplosionRadius   = level;
-            case SAND_COOLDOWN          -> this.sandCooldown          = level;
-            case GEM_CHANCE             -> this.gemChance             = level;
-            case GEM_MULTIPLIER         -> this.gemMultiplier         = level;
-            case EFFICIENCY             -> this.efficiency            = level;
-            case SPEED                  -> this.speed                 = level;
+            case SAND_MULTIPLIER           -> this.sandMultiplier        = level;
+            case SAND_EXPLOSION_CHANCE     -> this.sandExplosionChance   = level;
+            case SAND_EXPLOSION_RADIUS     -> this.sandExplosionRadius   = level;
+            case SAND_COOLDOWN             -> this.sandCooldown          = level;
+            case GEM_CHANCE                -> this.gemChance             = level;
+            case GEM_MULTIPLIER            -> this.gemMultiplier         = level;
+            case EFFICIENCY                -> this.efficiency            = level;
+            case SPEED                     -> this.speed                 = level;
+            case SAND_JACKPOT              -> this.sandJackpot           = level;
+            case GEM_JACKPOT               -> this.gemJackpot            = level;
             case FACTORY_PRODUCTION_SPEED  -> this.factoryProductionSpeed  = level;
             case FACTORY_PRODUCTION_AMOUNT -> this.factoryProductionAmount = level;
         }
@@ -189,7 +227,9 @@ public class PlayerData {
         this.gemChance            = 0;
         this.gemMultiplier        = 0;
         this.efficiency           = 0;
-        this.speed                = 0;   // Speed resets on rebirth
+        this.speed                = 0;
+        this.sandJackpot          = 0;
+        this.gemJackpot           = 0;
         // Augments and skills are NOT reset here
     }
 
@@ -244,6 +284,8 @@ public class PlayerData {
         data.put("gemMultiplier",           gemMultiplier);
         data.put("efficiency",              efficiency);
         data.put("speed",                   speed);
+        data.put("sandJackpot",             sandJackpot);
+        data.put("gemJackpot",              gemJackpot);
         data.put("factoryUnlocked",         factoryUnlocked);
         data.put("factoryProductionSpeed",  factoryProductionSpeed);
         data.put("factoryProductionAmount", factoryProductionAmount);
@@ -283,6 +325,8 @@ public class PlayerData {
         pd.gemMultiplier          = (int)  data.getOrDefault("gemMultiplier",          0);
         pd.efficiency             = (int)  data.getOrDefault("efficiency",             0);
         pd.speed                  = (int)  data.getOrDefault("speed",                  0);
+        pd.sandJackpot            = (int)  data.getOrDefault("sandJackpot",            0);
+        pd.gemJackpot             = (int)  data.getOrDefault("gemJackpot",             0);
         pd.factoryUnlocked        = (boolean) data.getOrDefault("factoryUnlocked",    false);
         pd.factoryProductionSpeed = (int)  data.getOrDefault("factoryProductionSpeed",  0);
         pd.factoryProductionAmount= (int)  data.getOrDefault("factoryProductionAmount", 0);
@@ -358,6 +402,8 @@ public class PlayerData {
         GEM_MULTIPLIER,
         EFFICIENCY,
         SPEED,
+        SAND_JACKPOT,
+        GEM_JACKPOT,
         FACTORY_PRODUCTION_SPEED,
         FACTORY_PRODUCTION_AMOUNT
     }

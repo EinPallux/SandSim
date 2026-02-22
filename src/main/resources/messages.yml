@@ -4,10 +4,16 @@ messages:
   # Sand Mining
   need-shovel: "&cYou need a Sand Shovel to mine sand!"
   sand-mined: "&e+%amount% Sand"
+  sand-mined-jackpot: "&6&l⚡ JACKPOT! &e+%amount% Sand &6(×5)"
   sand-explosion: "&e&l💥 SAND EXPLOSION! &7(+%blocks% blocks)"
   gem-found: "&b&l💎 GEM FOUND! &7(+%amount%)"
+  gem-found-jackpot: "&b&l💎⚡ GEM JACKPOT! &7(+%amount%)"
   cannot-drop-shovel: "&cYou cannot drop your Sand Shovel!"
   cannot-drop-menu: "&cYou cannot drop the Menu item!"
+
+  # Jackpot
+  sand-jackpot-triggered: "&6&l⚡ SAND JACKPOT! &eSand is &6×5 &efor &65 seconds!"
+  gem-jackpot-triggered:  "&b&l⚡ GEM JACKPOT!  &bGems are &3×5 &bfor &35 seconds!"
 
   # Leveling
   level-up: "&a&l⬆ LEVEL UP! &7You are now &aLevel %level%&7!"
@@ -34,6 +40,7 @@ messages:
   # Upgrades
   upgrade-purchased: "&a&l✓ Upgrade purchased successfully!"
   cannot-afford-upgrade: "&cYou cannot afford this upgrade!"
+  cannot-afford-upgrade-sandbucks: "&cYou need more &6Sandbucks &cfor this upgrade!"
   upgrade-maxed: "&cThis upgrade is already at max level!"
 
   # Factory

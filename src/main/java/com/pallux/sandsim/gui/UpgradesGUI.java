@@ -3,6 +3,7 @@ package com.pallux.sandsim.gui;
 import com.pallux.sandsim.SandSimPlugin;
 import com.pallux.sandsim.data.PlayerData;
 import com.pallux.sandsim.data.PlayerData.UpgradeType;
+import com.pallux.sandsim.manager.UpgradeManager.Currency;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -29,6 +30,7 @@ public class UpgradesGUI extends BaseGUI {
         applyFiller(SEC, cfg);
         inventory.setItem(slotFromConfig(SEC + ".back", cfg, 49), itemFromConfig(SEC + ".back", cfg));
 
+        // Sand-cost upgrades
         buildUpgrade(player, data, cfg, "sand-multiplier",       UpgradeType.SAND_MULTIPLIER,       11);
         buildUpgrade(player, data, cfg, "sand-explosion-chance", UpgradeType.SAND_EXPLOSION_CHANCE,  13);
         buildUpgrade(player, data, cfg, "sand-explosion-radius", UpgradeType.SAND_EXPLOSION_RADIUS,  14);
@@ -37,6 +39,10 @@ public class UpgradesGUI extends BaseGUI {
         buildUpgrade(player, data, cfg, "efficiency",            UpgradeType.EFFICIENCY,             10);
         buildUpgrade(player, data, cfg, "gem-multiplier",        UpgradeType.GEM_MULTIPLIER,         16);
         buildUpgrade(player, data, cfg, "speed",                 UpgradeType.SPEED,                  22);
+
+        // Sandbucks-cost upgrades
+        buildUpgrade(player, data, cfg, "sand-jackpot",          UpgradeType.SAND_JACKPOT,           20);
+        buildUpgrade(player, data, cfg, "gem-jackpot",           UpgradeType.GEM_JACKPOT,            24);
 
         applyPlaceholderItems(SEC, cfg);
     }
@@ -47,7 +53,12 @@ public class UpgradesGUI extends BaseGUI {
         int        currentLevel = data.getUpgradeLevel(type);
         int        maxLevel     = plugin.getUpgradeManager().getMaxLevel(type);
         BigDecimal cost         = plugin.getUpgradeManager().getUpgradeCost(type, currentLevel);
-        boolean    canAfford    = data.getSand().compareTo(cost) >= 0;
+        Currency   currency     = plugin.getUpgradeManager().getUpgradeCurrency(type);
+        boolean    canAfford    = switch (currency) {
+            case SAND      -> data.getSand().compareTo(cost) >= 0;
+            case SANDBUCKS -> data.getSandbucks().compareTo(cost) >= 0;
+            case GEMS      -> data.getGems().compareTo(cost) >= 0;
+        };
         boolean    isMaxed      = currentLevel >= maxLevel;
 
         Material mat  = parseMaterial(cfg.getString(path + ".material", "STONE"), Material.STONE);
@@ -78,6 +89,11 @@ public class UpgradesGUI extends BaseGUI {
                 default -> String.valueOf(level);
             };
         }
+        // Jackpot — show as "0.001%" style
+        if (type == UpgradeType.SAND_JACKPOT || type == UpgradeType.GEM_JACKPOT) {
+            double val = plugin.getUpgradeManager().getUpgradeValue(type, level);
+            return String.format("%.3f%%", val);
+        }
         double val = plugin.getUpgradeManager().getUpgradeValue(type, level);
         if (val == Math.floor(val) && !Double.isInfinite(val)) return String.valueOf((int) val);
         return String.valueOf(val);
@@ -100,19 +116,23 @@ public class UpgradesGUI extends BaseGUI {
                 plugin.getShovelManager().refreshShovel(player);
             }
             if (type == UpgradeType.SPEED) {
-                // Apply Speed effect immediately
                 applySpeedEffect(player);
             }
             setupInventory(player);
         } else {
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-            plugin.getMessageManager().sendMessage(player, "messages.cannot-afford-upgrade");
+            // Pick the right "cannot afford" message based on currency
+            Currency currency = plugin.getUpgradeManager().getUpgradeCurrency(type);
+            String msgKey = switch (currency) {
+                case SANDBUCKS -> "messages.cannot-afford-upgrade-sandbucks";
+                default        -> "messages.cannot-afford-upgrade";
+            };
+            plugin.getMessageManager().sendMessage(player, msgKey);
         }
     }
 
     private void applySpeedEffect(Player player) {
         PlayerData data = plugin.getDataManager().getPlayerData(player);
-        // amplifier 0 = Speed I, amplifier 1 = Speed II
         int amplifier = data.getUpgradeLevel(PlayerData.UpgradeType.SPEED) - 1;
         player.addPotionEffect(new org.bukkit.potion.PotionEffect(
                 org.bukkit.potion.PotionEffectType.SPEED,
@@ -133,6 +153,8 @@ public class UpgradesGUI extends BaseGUI {
         if (slot == slotFromConfig(SEC + ".efficiency",            cfg, 10)) return UpgradeType.EFFICIENCY;
         if (slot == slotFromConfig(SEC + ".gem-multiplier",        cfg, 16)) return UpgradeType.GEM_MULTIPLIER;
         if (slot == slotFromConfig(SEC + ".speed",                 cfg, 22)) return UpgradeType.SPEED;
+        if (slot == slotFromConfig(SEC + ".sand-jackpot",          cfg, 20)) return UpgradeType.SAND_JACKPOT;
+        if (slot == slotFromConfig(SEC + ".gem-jackpot",           cfg, 24)) return UpgradeType.GEM_JACKPOT;
         return null;
     }
 }

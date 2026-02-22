@@ -11,6 +11,9 @@ sand-block:
   # Red Sand gives 1.5x sand multiplier when broken
   red-sand-material: RED_SAND
   red-sand-multiplier: 1.5
+  # Soul Soil gives 2x sand multiplier when broken
+  soul-soil-material: SOUL_SOIL
+  soul-soil-multiplier: 2.0
 
 # Rebirth Settings
 rebirth:
@@ -24,7 +27,7 @@ factory:
 
 # ── Protection Settings ──────────────────────────────────────────────────────
 protection:
-  # Prevent players from breaking blocks other than Sand/Red Sand
+  # Prevent players from breaking blocks other than Sand/Red Sand/Soul Soil
   # Bypass permission: sandsim.bypass.blockbreak
   block-break-protection: true
 

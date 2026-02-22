@@ -21,60 +21,81 @@ public class UpgradeManager {
     }
 
     private void loadUpgradeInfo() {
-        // Config now lives in gui_menus/upgrades-gui.yml, accessed via getUpgradesConfig()
         FileConfiguration config = plugin.getConfigManager().getUpgradesConfig();
 
         upgradeInfoMap.put(UpgradeType.SAND_MULTIPLIER, new UpgradeInfo(
                 1, 100, 1,
                 config.getDouble("upgrades.sand-multiplier.base-cost", 100),
-                config.getDouble("upgrades.sand-multiplier.cost-multiplier", 1.15)));
+                config.getDouble("upgrades.sand-multiplier.cost-multiplier", 1.15),
+                Currency.SAND));
 
         upgradeInfoMap.put(UpgradeType.SAND_EXPLOSION_CHANCE, new UpgradeInfo(
                 0, 100, 0.01,
                 config.getDouble("upgrades.sand-explosion-chance.base-cost", 500),
-                config.getDouble("upgrades.sand-explosion-chance.cost-multiplier", 1.2)));
+                config.getDouble("upgrades.sand-explosion-chance.cost-multiplier", 1.2),
+                Currency.SAND));
 
         upgradeInfoMap.put(UpgradeType.SAND_EXPLOSION_RADIUS, new UpgradeInfo(
                 1, 10, 1,
                 config.getDouble("upgrades.sand-explosion-radius.base-cost", 1000),
-                config.getDouble("upgrades.sand-explosion-radius.cost-multiplier", 1.25)));
+                config.getDouble("upgrades.sand-explosion-radius.cost-multiplier", 1.25),
+                Currency.SAND));
 
         upgradeInfoMap.put(UpgradeType.SAND_COOLDOWN, new UpgradeInfo(
                 5.0, 0.1, -0.01,
                 config.getDouble("upgrades.sand-cooldown.base-cost", 250),
-                config.getDouble("upgrades.sand-cooldown.cost-multiplier", 1.18)));
+                config.getDouble("upgrades.sand-cooldown.cost-multiplier", 1.18),
+                Currency.SAND));
 
         upgradeInfoMap.put(UpgradeType.GEM_CHANCE, new UpgradeInfo(
                 0, 50, 0.01,
                 config.getDouble("upgrades.gem-chance.base-cost", 750),
-                config.getDouble("upgrades.gem-chance.cost-multiplier", 1.22)));
+                config.getDouble("upgrades.gem-chance.cost-multiplier", 1.22),
+                Currency.SAND));
 
         upgradeInfoMap.put(UpgradeType.GEM_MULTIPLIER, new UpgradeInfo(
                 1, 10, 1,
                 config.getDouble("upgrades.gem-multiplier.base-cost", 2000),
-                config.getDouble("upgrades.gem-multiplier.cost-multiplier", 1.3)));
+                config.getDouble("upgrades.gem-multiplier.cost-multiplier", 1.3),
+                Currency.SAND));
 
         upgradeInfoMap.put(UpgradeType.EFFICIENCY, new UpgradeInfo(
                 0, 5, 1,
                 config.getDouble("upgrades.efficiency.base-cost", 500),
-                config.getDouble("upgrades.efficiency.cost-multiplier", 3.0)));
+                config.getDouble("upgrades.efficiency.cost-multiplier", 3.0),
+                Currency.SAND));
 
-        // Speed: max 2 levels. Level 1 costs 50,000; Level 2 costs 250,000.
-        // cost-multiplier of 5.0 gives: 50000 * 5^0 = 50000, 50000 * 5^1 = 250000
         upgradeInfoMap.put(UpgradeType.SPEED, new UpgradeInfo(
                 0, 2, 1,
                 config.getDouble("upgrades.speed.base-cost", 50000),
-                config.getDouble("upgrades.speed.cost-multiplier", 5.0)));
+                config.getDouble("upgrades.speed.cost-multiplier", 5.0),
+                Currency.SAND));
+
+        // ── Jackpot upgrades — paid in SANDBUCKS ─────────────────────────────
+        // Max 50 levels × 0.001% each = 0.05% max activation chance
+        upgradeInfoMap.put(UpgradeType.SAND_JACKPOT, new UpgradeInfo(
+                0, 50, 0.001,           // base 0%, +0.001% per level, max 0.05%
+                config.getDouble("upgrades.sand-jackpot.base-cost", 1000),
+                config.getDouble("upgrades.sand-jackpot.cost-multiplier", 1.25),
+                Currency.SANDBUCKS));
+
+        upgradeInfoMap.put(UpgradeType.GEM_JACKPOT, new UpgradeInfo(
+                0, 50, 0.001,
+                config.getDouble("upgrades.gem-jackpot.base-cost", 1000),
+                config.getDouble("upgrades.gem-jackpot.cost-multiplier", 1.25),
+                Currency.SANDBUCKS));
 
         upgradeInfoMap.put(UpgradeType.FACTORY_PRODUCTION_SPEED, new UpgradeInfo(
                 5.0, 1.0, -0.01,
                 config.getDouble("upgrades.factory-production-speed.base-cost", 100),
-                config.getDouble("upgrades.factory-production-speed.cost-multiplier", 1.15)));
+                config.getDouble("upgrades.factory-production-speed.cost-multiplier", 1.15),
+                Currency.SANDBUCKS));
 
         upgradeInfoMap.put(UpgradeType.FACTORY_PRODUCTION_AMOUNT, new UpgradeInfo(
                 1, 1000, 1,
                 config.getDouble("upgrades.factory-production-amount.base-cost", 150),
-                config.getDouble("upgrades.factory-production-amount.cost-multiplier", 1.12)));
+                config.getDouble("upgrades.factory-production-amount.cost-multiplier", 1.12),
+                Currency.SANDBUCKS));
     }
 
     public UpgradeInfo getUpgradeInfo(UpgradeType type) { return upgradeInfoMap.get(type); }
@@ -92,16 +113,31 @@ public class UpgradeManager {
         return BigDecimal.valueOf(cost).setScale(0, java.math.RoundingMode.CEILING);
     }
 
+    /** Returns which currency this upgrade requires. */
+    public Currency getUpgradeCurrency(UpgradeType type) {
+        UpgradeInfo info = upgradeInfoMap.get(type);
+        return info == null ? Currency.SAND : info.currency;
+    }
+
     public boolean canUpgrade(PlayerData data, UpgradeType type) {
         int currentLevel = data.getUpgradeLevel(type);
         if (currentLevel >= getMaxLevel(type)) return false;
-        return data.getSand().compareTo(getUpgradeCost(type, currentLevel)) >= 0;
+        BigDecimal cost = getUpgradeCost(type, currentLevel);
+        return switch (getUpgradeCurrency(type)) {
+            case SAND      -> data.getSand().compareTo(cost) >= 0;
+            case SANDBUCKS -> data.getSandbucks().compareTo(cost) >= 0;
+            case GEMS      -> data.getGems().compareTo(cost) >= 0;
+        };
     }
 
     public boolean purchaseUpgrade(PlayerData data, UpgradeType type) {
         if (!canUpgrade(data, type)) return false;
         BigDecimal cost = getUpgradeCost(type, data.getUpgradeLevel(type));
-        data.removeSand(cost);
+        switch (getUpgradeCurrency(type)) {
+            case SAND      -> data.removeSand(cost);
+            case SANDBUCKS -> data.removeSandbucks(cost);
+            case GEMS      -> data.removeGems(cost);
+        }
         data.upgradeLevel(type, 1);
         return true;
     }
@@ -116,10 +152,32 @@ public class UpgradeManager {
             case GEM_MULTIPLIER            -> 10;
             case EFFICIENCY                -> 5;
             case SPEED                     -> 2;
+            case SAND_JACKPOT              -> 50;
+            case GEM_JACKPOT               -> 50;
             case FACTORY_PRODUCTION_SPEED  -> 400;
             case FACTORY_PRODUCTION_AMOUNT -> 1000;
         };
     }
+
+    // ── Sand Jackpot helpers ──────────────────────────────────────────────────
+
+    /**
+     * Returns the Sand Jackpot activation chance as a percentage (e.g. 0.03 = 0.03%).
+     */
+    public double getSandJackpotChance(PlayerData data) {
+        return getUpgradeValue(UpgradeType.SAND_JACKPOT,
+                data.getUpgradeLevel(UpgradeType.SAND_JACKPOT));
+    }
+
+    /**
+     * Returns the Gem Jackpot activation chance as a percentage (e.g. 0.02 = 0.02%).
+     */
+    public double getGemJackpotChance(PlayerData data) {
+        return getUpgradeValue(UpgradeType.GEM_JACKPOT,
+                data.getUpgradeLevel(UpgradeType.GEM_JACKPOT));
+    }
+
+    // ── Convenience getters ───────────────────────────────────────────────────
 
     public double getSandMultiplier(PlayerData data) {
         return getUpgradeValue(UpgradeType.SAND_MULTIPLIER, data.getUpgradeLevel(UpgradeType.SAND_MULTIPLIER));
@@ -142,7 +200,6 @@ public class UpgradeManager {
     public int getEfficiencyLevel(PlayerData data) {
         return data.getUpgradeLevel(UpgradeType.EFFICIENCY);
     }
-    /** Returns true if the player has purchased the Speed upgrade. */
     public boolean hasSpeedUpgrade(PlayerData data) {
         return data.getUpgradeLevel(UpgradeType.SPEED) >= 1;
     }
@@ -153,20 +210,34 @@ public class UpgradeManager {
         return getUpgradeValue(UpgradeType.FACTORY_PRODUCTION_AMOUNT, data.getUpgradeLevel(UpgradeType.FACTORY_PRODUCTION_AMOUNT));
     }
 
+    // ── Currency enum ─────────────────────────────────────────────────────────
+
+    public enum Currency { SAND, SANDBUCKS, GEMS }
+
+    // ── UpgradeInfo ───────────────────────────────────────────────────────────
+
     public static class UpgradeInfo {
-        public final double baseValue;
-        public final double maxValue;
-        public final double valuePerLevel;
-        public final double baseCost;
-        public final double costMultiplier;
+        public final double   baseValue;
+        public final double   maxValue;
+        public final double   valuePerLevel;
+        public final double   baseCost;
+        public final double   costMultiplier;
+        public final Currency currency;
 
         public UpgradeInfo(double baseValue, double maxValue, double valuePerLevel,
-                           double baseCost, double costMultiplier) {
+                           double baseCost, double costMultiplier, Currency currency) {
             this.baseValue      = baseValue;
             this.maxValue       = maxValue;
             this.valuePerLevel  = valuePerLevel;
             this.baseCost       = baseCost;
             this.costMultiplier = costMultiplier;
+            this.currency       = currency;
+        }
+
+        /** Backward-compat constructor that defaults to SAND currency. */
+        public UpgradeInfo(double baseValue, double maxValue, double valuePerLevel,
+                           double baseCost, double costMultiplier) {
+            this(baseValue, maxValue, valuePerLevel, baseCost, costMultiplier, Currency.SAND);
         }
     }
 }
