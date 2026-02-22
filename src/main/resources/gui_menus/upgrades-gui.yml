@@ -368,7 +368,7 @@ upgrades-gui:
 
   # ── Gem Jackpot (costs Sandbucks) ────────────────────────────────────────────
   gem-jackpot:
-    slot: 24
+    slot: 21
     material: ENCHANTED_GOLDEN_APPLE
     name: "&b&l⚡ Gem Jackpot"
     lore:
@@ -412,4 +412,4 @@ upgrades-gui:
     material: GRAY_DYE
     name: "&7&o???"
     lore: []
-    slots: [21,22,23,25,28,29,30,31,32,33,34]
+    slots: [22,23,24,25,28,29,30,31,32,33,34]

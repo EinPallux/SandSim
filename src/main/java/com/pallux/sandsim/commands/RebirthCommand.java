@@ -16,13 +16,17 @@ public class RebirthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) { sender.sendMessage("Players only!"); return true; }
-        if (!player.hasPermission("sandsim.player")) { plugin.getMessageManager().sendMessage(player, "messages.no-permission"); return true; }
+        if (!player.hasPermission("sandsim.player")) {
+            plugin.getMessageManager().sendMessage(player, "messages.no-permission");
+            return true;
+        }
 
         PlayerData data = plugin.getDataManager().getPlayerData(player);
-        int maxRebirths = plugin.getRebirthManager().getMaxRebirths(data);
+        long maxRebirths = plugin.getRebirthManager().getMaxRebirths(data);
 
         if (maxRebirths <= 0) {
-            plugin.getMessageManager().sendMessage(player, "messages.cannot-rebirth", "%cost%", plugin.getRebirthManager().getRebirthCost().toPlainString());
+            plugin.getMessageManager().sendMessage(player, "messages.cannot-rebirth",
+                    "%cost%", plugin.getRebirthManager().getRebirthCost().toPlainString());
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             return true;
         }
@@ -34,8 +38,11 @@ public class RebirthCommand implements CommandExecutor {
             // Rebirth also resets the Speed upgrade — remove the potion effect.
             player.removePotionEffect(PotionEffectType.SPEED);
 
-            plugin.getMessageManager().sendMessage(player, "messages.rebirth-success", "%amount%", String.valueOf(maxRebirths));
-            plugin.getMessageManager().sendMessage(player, "messages.rebirth-multiplier", "%multiplier%", String.format("%.2fx", plugin.getRebirthManager().getRebirthMultiplier(data)));
+            plugin.getMessageManager().sendMessage(player, "messages.rebirth-success",
+                    "%amount%", String.valueOf(maxRebirths));
+            plugin.getMessageManager().sendMessage(player, "messages.rebirth-multiplier",
+                    "%multiplier%", String.format("%.2fx",
+                            plugin.getRebirthManager().getRebirthMultiplier(data)));
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
         } else {
             plugin.getMessageManager().sendMessage(player, "messages.rebirth-failed");

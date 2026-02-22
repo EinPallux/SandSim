@@ -34,13 +34,16 @@ public class MenuGUI extends BaseGUI {
         // Guide
         inventory.setItem(slotFromConfig(SEC + ".guide", 13), itemFromConfig(SEC + ".guide"));
 
-        // Rebirth
-        int maxRebirths = plugin.getRebirthManager().getMaxRebirths(data);
+        // Rebirth — use long to avoid int overflow with huge sand amounts
+        long maxRebirths = plugin.getRebirthManager().getMaxRebirths(data);
         String cost       = formatNumber(plugin.getRebirthManager().getRebirthCost());
         String multiplier = String.format("%.2fx", plugin.getRebirthManager().getRebirthMultiplier(data));
         List<String> rebirthLore = new ArrayList<>();
         for (String line : cfg.getStringList(SEC + ".rebirth.lore")) {
-            rebirthLore.add(applyPlaceholders(line, "%cost%", cost, "%amount%", String.valueOf(maxRebirths), "%multiplier%", multiplier));
+            rebirthLore.add(applyPlaceholders(line,
+                    "%cost%",       cost,
+                    "%amount%",     String.valueOf(maxRebirths),
+                    "%multiplier%", multiplier));
         }
         inventory.setItem(slotFromConfig(SEC + ".rebirth", 15),
                 createItem(parseMaterial(cfg.getString(SEC + ".rebirth.material", "NETHER_STAR"), org.bukkit.Material.NETHER_STAR),
